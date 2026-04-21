@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -26,9 +26,44 @@ const sectionFade = {
 
 function Nav({ current, setCurrent }) {
   const [open, setOpen] = useState(false);
+  const [hiddenOnScroll, setHiddenOnScroll] = useState(false);
+
+  useEffect(() => {
+    let lastScrollY = 0;
+
+    const handleScroll = () => {
+      const isDesktop = window.innerWidth >= 768;
+      const nextScrollY = window.scrollY;
+
+      if (isDesktop) {
+        setHiddenOnScroll(false);
+        lastScrollY = nextScrollY;
+        return;
+      }
+
+      if (open) {
+        setHiddenOnScroll(false);
+        lastScrollY = nextScrollY;
+        return;
+      }
+
+      const scrollingDown = nextScrollY > lastScrollY;
+      setHiddenOnScroll(scrollingDown && nextScrollY > 64);
+      lastScrollY = nextScrollY;
+    };
+
+    handleScroll();
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    window.addEventListener('resize', handleScroll);
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', handleScroll);
+    };
+  }, [open]);
 
   return (
-    <header className="sticky top-0 z-50 border-b border-emerald-100/80 bg-white/90 backdrop-blur">
+    <header className={`sticky top-0 z-50 border-b border-emerald-100/80 bg-white/90 backdrop-blur transition-transform duration-300 md:translate-y-0 ${hiddenOnScroll ? '-translate-y-full' : 'translate-y-0'}`}>
       <div className="mx-auto flex w-full max-w-[1800px] items-center justify-between px-3 py-3 sm:px-4 lg:px-5">
         <button className="flex items-center gap-3 text-left" onClick={() => setCurrent('home')}>
           <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-emerald-600 text-white shadow-sm">
@@ -1110,7 +1145,7 @@ function FinancePage() {
             <CardContent className="overflow-hidden p-3 sm:p-6">
               <p className="mb-2 text-xs text-slate-500 md:hidden">Swipe left/right to view all columns</p>
               <div className="md:hidden">
-                <div className="overflow-x-auto overflow-y-auto rounded-2xl border border-emerald-100" style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-x pan-y' }}>
+                <div className="w-full max-w-full overflow-x-auto overflow-y-auto overscroll-x-contain rounded-2xl border border-emerald-100" style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-x pan-y' }}>
                   <table className="w-max min-w-[1180px] table-auto text-left text-[11px]">
                     <thead className="sticky top-0 bg-white">
                       <tr className="border-b border-emerald-100 text-slate-500">
@@ -1184,7 +1219,7 @@ function FinancePage() {
             <CardContent className="overflow-hidden p-3 sm:p-6">
               <p className="mb-2 text-xs text-slate-500 md:hidden">Swipe left/right to view all columns</p>
               <div className="md:hidden">
-                <div className="overflow-x-auto overflow-y-hidden rounded-2xl border border-emerald-100" style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-x pan-y' }}>
+                <div className="w-full max-w-full overflow-x-auto overflow-y-hidden overscroll-x-contain rounded-2xl border border-emerald-100" style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-x pan-y' }}>
                   <table className="w-max min-w-[1020px] table-auto text-left text-xs">
                     <thead>
                       <tr className="border-b border-emerald-100 text-slate-500">
@@ -1278,8 +1313,8 @@ function FinancePage() {
                 <CardTitle className="text-xl">Inflow vs cost by month</CardTitle>
                 <CardDescription>Shows how sponsor income and plastic revenue compare against monthly opex and capex</CardDescription>
               </CardHeader>
-              <CardContent className="h-[220px] sm:h-[280px] p-2 sm:p-4">
-                  <div className="md:hidden h-full max-w-full overflow-x-auto overflow-y-hidden rounded-2xl" style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-x pan-y' }}>
+              <CardContent className="h-[220px] overflow-hidden p-2 sm:h-[280px] sm:p-4">
+                  <div className="h-full w-full max-w-full overflow-x-auto overflow-y-hidden overscroll-x-contain rounded-2xl md:hidden" style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-x pan-y' }}>
                     <div className="h-full w-max min-w-[920px]">
                       <ResponsiveContainer width="100%" height="100%">
                         <AreaChart data={chartData}>
@@ -1515,7 +1550,7 @@ export default function ProjectWebsite() {
   }, [current]);
 
   return (
-    <div className="min-h-screen bg-[linear-gradient(to_bottom,white,rgba(236,253,245,0.35),white)] text-slate-900">
+    <div className="min-h-screen overflow-x-hidden bg-[linear-gradient(to_bottom,white,rgba(236,253,245,0.35),white)] text-slate-900">
       <Nav current={current} setCurrent={setCurrent} />
       <main>{page}</main>
       <Separator className="bg-transparent" />
