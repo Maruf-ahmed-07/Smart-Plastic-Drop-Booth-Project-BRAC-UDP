@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -63,7 +63,7 @@ function Nav({ current, setCurrent }) {
   }, [open]);
 
   return (
-    <header className={`sticky top-0 z-50 border-b border-emerald-100/80 bg-white/90 backdrop-blur transition-transform duration-300 md:translate-y-0 ${hiddenOnScroll ? '-translate-y-full' : 'translate-y-0'}`}>
+    <header className={`fixed inset-x-0 top-0 z-50 border-b border-emerald-100/80 bg-white/90 backdrop-blur transition-transform duration-300 md:sticky md:top-0 md:translate-y-0 ${hiddenOnScroll ? '-translate-y-full' : 'translate-y-0'}`}>
       <div className="mx-auto flex w-full max-w-[1800px] items-center justify-between px-3 py-3 sm:px-4 lg:px-5">
         <button className="flex items-center gap-3 text-left" onClick={() => setCurrent('home')}>
           <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-emerald-600 text-white shadow-sm">
@@ -111,6 +111,51 @@ function Nav({ current, setCurrent }) {
         </div>
       )}
     </header>
+  );
+}
+
+function MobileHorizontalScroll({ children, className = '', contentClassName = '' }) {
+  const scrollRef = useRef(null);
+  const touchStateRef = useRef({ startX: 0, startY: 0, scrollLeft: 0, axis: null });
+
+  const handleTouchStart = (event) => {
+    const touch = event.touches[0];
+    touchStateRef.current = {
+      startX: touch.clientX,
+      startY: touch.clientY,
+      scrollLeft: scrollRef.current?.scrollLeft ?? 0,
+      axis: null,
+    };
+  };
+
+  const handleTouchMove = (event) => {
+    const container = scrollRef.current;
+    if (!container) return;
+
+    const touch = event.touches[0];
+    const deltaX = touch.clientX - touchStateRef.current.startX;
+    const deltaY = touch.clientY - touchStateRef.current.startY;
+
+    if (!touchStateRef.current.axis) {
+      touchStateRef.current.axis = Math.abs(deltaX) > Math.abs(deltaY) ? 'x' : 'y';
+    }
+
+    if (touchStateRef.current.axis !== 'x') return;
+
+    event.preventDefault();
+    container.scrollLeft = touchStateRef.current.scrollLeft - deltaX;
+  };
+
+  return (
+    <div
+      ref={scrollRef}
+      className={`w-full overflow-x-auto overflow-y-hidden overscroll-x-contain ${className}`}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      style={{ WebkitOverflowScrolling: 'touch' }}
+    >
+      <div className={contentClassName}>{children}</div>
+    </div>
   );
 }
 
@@ -762,6 +807,14 @@ function FinancePage() {
   const mobileOpexBreakdown = opexBreakdown;
   const mobileSponsorBreakdown = sponsorBreakdown;
   const mobilePlasticFormulaRows = plasticFormulaRows;
+  const [isMobileView, setIsMobileView] = useState(() => window.innerWidth < 768);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobileView(window.innerWidth < 768);
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   return (
     <div className="mx-auto w-full max-w-[1800px] px-3 py-10 sm:px-4 lg:px-5 md:py-14">
@@ -808,14 +861,14 @@ function FinancePage() {
             </CardContent>
           </Card>
 
-          <Card className="rounded-[2rem] border-sky-100 shadow-none">
+          <Card className="min-w-0 rounded-[2rem] border-sky-100 shadow-none">
             <CardHeader>
               <CardTitle className="text-xl">Visual cashflow trend</CardTitle>
               <CardDescription>Monthly net cashflow and cumulative position over 24 months</CardDescription>
             </CardHeader>
             <CardContent className="h-[280px] sm:h-[340px] p-2 sm:p-4">
-              <div className="h-full w-full">
-                  <ResponsiveContainer width="100%" height="100%">
+              <div className="h-full w-full min-w-0 min-h-[264px]">
+                  <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={264}>
                     <LineChart data={chartData}>
                       <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
                       <XAxis dataKey="month" tick={{ fontSize: 12 }} />
@@ -873,14 +926,14 @@ function FinancePage() {
             </CardContent>
           </Card>
 
-          <Card className="rounded-[2rem] border-sky-100 shadow-none">
+          <Card className="min-w-0 rounded-[2rem] border-sky-100 shadow-none">
             <CardHeader>
               <CardTitle className="text-xl">Revenue mix by month</CardTitle>
               <CardDescription>How sponsor revenue and plastic revenue combine over time</CardDescription>
             </CardHeader>
             <CardContent className="h-[280px] sm:h-[400px] p-2 sm:p-4">
-              <div className="h-full w-full">
-                  <ResponsiveContainer width="100%" height="100%">
+              <div className="h-full w-full min-w-0 min-h-[264px]">
+                  <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={264}>
                     <BarChart data={chartData}>
                       <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
                       <XAxis dataKey="month" tick={{ fontSize: 12 }} />
@@ -1145,8 +1198,8 @@ function FinancePage() {
             <CardContent className="overflow-hidden p-3 sm:p-6">
               <p className="mb-2 text-xs text-slate-500 md:hidden">Swipe left/right to view all columns</p>
               <div className="md:hidden">
-                <div className="w-full max-w-full overflow-x-auto overflow-y-auto overscroll-x-contain rounded-2xl border border-emerald-100" style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-x pan-y' }}>
-                  <table className="w-max min-w-[1180px] table-auto text-left text-[11px]">
+                <MobileHorizontalScroll className="rounded-2xl border border-emerald-100" contentClassName="w-max min-w-[1180px]">
+                    <table className="w-max min-w-[1180px] table-auto text-left text-[11px]">
                     <thead className="sticky top-0 bg-white">
                       <tr className="border-b border-emerald-100 text-slate-500">
                         {['Month', 'Phase', 'Booths', 'Kg/day/booth', 'Monthly kg', 'Plastic revenue', 'Sponsor recurring', 'Sponsor support', 'Total inflow', 'Opex', 'Capex', 'Net', 'Cumulative'].map((h) => (
@@ -1173,8 +1226,8 @@ function FinancePage() {
                         </tr>
                       ))}
                     </tbody>
-                  </table>
-                </div>
+                    </table>
+                </MobileHorizontalScroll>
               </div>
               <div className="hidden md:block">
                 <div className="max-h-[520px] max-w-full overflow-x-auto overflow-y-auto overscroll-x-contain rounded-2xl border border-emerald-100" style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-x pan-y' }}>
@@ -1219,8 +1272,8 @@ function FinancePage() {
             <CardContent className="overflow-hidden p-3 sm:p-6">
               <p className="mb-2 text-xs text-slate-500 md:hidden">Swipe left/right to view all columns</p>
               <div className="md:hidden">
-                <div className="w-full max-w-full overflow-x-auto overflow-y-hidden overscroll-x-contain rounded-2xl border border-emerald-100" style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-x pan-y' }}>
-                  <table className="w-max min-w-[1020px] table-auto text-left text-xs">
+                <MobileHorizontalScroll className="rounded-2xl border border-emerald-100" contentClassName="w-max min-w-[1020px]">
+                    <table className="w-max min-w-[1020px] table-auto text-left text-xs">
                     <thead>
                       <tr className="border-b border-emerald-100 text-slate-500">
                         <th className="px-2 py-2 font-medium whitespace-nowrap">Phase</th>
@@ -1258,8 +1311,8 @@ function FinancePage() {
                         <td className="px-2 py-2 text-emerald-700 whitespace-nowrap">{currency(35704)}</td>
                       </tr>
                     </tbody>
-                  </table>
-                </div>
+                    </table>
+                </MobileHorizontalScroll>
               </div>
               <div className="hidden md:block">
                 <div className="max-w-full overflow-x-auto overflow-y-hidden overscroll-x-contain rounded-2xl border border-emerald-100" style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-x pan-y' }}>
@@ -1314,9 +1367,9 @@ function FinancePage() {
                 <CardDescription>Shows how sponsor income and plastic revenue compare against monthly opex and capex</CardDescription>
               </CardHeader>
               <CardContent className="h-[220px] overflow-hidden p-2 sm:h-[280px] sm:p-4">
-                  <div className="h-full w-full max-w-full overflow-x-auto overflow-y-hidden overscroll-x-contain rounded-2xl md:hidden" style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-x pan-y' }}>
-                    <div className="h-full w-max min-w-[920px]">
-                      <ResponsiveContainer width="100%" height="100%">
+                  {isMobileView ? (
+                  <MobileHorizontalScroll className="h-full rounded-2xl" contentClassName="h-full w-max min-w-[920px] min-h-[204px]">
+                      <ResponsiveContainer width="100%" height="100%" minWidth={920} minHeight={204}>
                         <AreaChart data={chartData}>
                           <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
                           <XAxis dataKey="month" tick={{ fontSize: 12 }} />
@@ -1329,10 +1382,10 @@ function FinancePage() {
                           <Line type="monotone" dataKey="capex" stroke="#ef4444" strokeWidth={2} dot={false} name="Capex spike" />
                         </AreaChart>
                       </ResponsiveContainer>
-                    </div>
-                  </div>
-                  <div className="hidden md:block h-full w-full">
-                    <ResponsiveContainer width="100%" height="100%">
+                  </MobileHorizontalScroll>
+                  ) : (
+                  <div className="h-full w-full min-w-0 min-h-[204px]">
+                    <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={204}>
                       <AreaChart data={chartData}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
                         <XAxis dataKey="month" tick={{ fontSize: 12 }} />
@@ -1346,6 +1399,7 @@ function FinancePage() {
                       </AreaChart>
                     </ResponsiveContainer>
                 </div>
+                  )}
               </CardContent>
             </Card>
 
@@ -1552,7 +1606,7 @@ export default function ProjectWebsite() {
   return (
     <div className="min-h-screen overflow-x-hidden bg-[linear-gradient(to_bottom,white,rgba(236,253,245,0.35),white)] text-slate-900">
       <Nav current={current} setCurrent={setCurrent} />
-      <main>{page}</main>
+      <main className="pt-[76px] md:pt-0">{page}</main>
       <Separator className="bg-transparent" />
       <section className="mx-auto w-full max-w-[1800px] px-3 py-6 sm:px-4 lg:px-5">
         <div className="rounded-[2rem] border border-emerald-100 bg-white p-6 shadow-sm">
