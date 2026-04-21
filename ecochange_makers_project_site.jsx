@@ -729,7 +729,7 @@ function FinancePage() {
   const mobilePlasticFormulaRows = plasticFormulaRows;
 
   return (
-    <div className="mx-auto w-full max-w-[1800px] overflow-x-hidden px-3 py-10 sm:px-4 lg:px-5 md:py-14">
+    <div className="mx-auto w-full max-w-[1800px] px-3 py-10 sm:px-4 lg:px-5 md:py-14">
       <motion.div variants={sectionFade} initial="hidden" animate="show" className="space-y-8">
         <div className="space-y-3">
           <Badge className="rounded-full bg-emerald-100 text-emerald-800 hover:bg-emerald-100">Finance</Badge>
@@ -1279,7 +1279,24 @@ function FinancePage() {
                 <CardDescription>Shows how sponsor income and plastic revenue compare against monthly opex and capex</CardDescription>
               </CardHeader>
               <CardContent className="h-[220px] sm:h-[280px] p-2 sm:p-4">
-                <div className="h-full w-full">
+                  <div className="md:hidden h-full max-w-full overflow-x-auto overflow-y-hidden rounded-2xl" style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-x pan-y' }}>
+                    <div className="h-full w-max min-w-[920px]">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <AreaChart data={chartData}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                          <XAxis dataKey="month" tick={{ fontSize: 12 }} />
+                          <YAxis tick={{ fontSize: 12 }} />
+                          <Tooltip formatter={(value) => currency(value)} />
+                          <Legend />
+                          <Area type="monotone" dataKey="plasticRevenue" stackId="1" stroke="#10b981" fill="#10b981" fillOpacity={0.6} name="Plastic revenue" />
+                          <Area type="monotone" dataKey="sponsorRecurring" stackId="1" stroke="#0ea5e9" fill="#0ea5e9" fillOpacity={0.6} name="Sponsor recurring" />
+                          <Line type="monotone" dataKey="opex" stroke="#0f172a" strokeWidth={2} dot={false} name="Monthly opex" />
+                          <Line type="monotone" dataKey="capex" stroke="#ef4444" strokeWidth={2} dot={false} name="Capex spike" />
+                        </AreaChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </div>
+                  <div className="hidden md:block h-full w-full">
                     <ResponsiveContainer width="100%" height="100%">
                       <AreaChart data={chartData}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
