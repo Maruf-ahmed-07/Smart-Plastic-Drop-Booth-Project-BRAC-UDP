@@ -270,7 +270,7 @@ function ProblemPage() {
 
 function SolutionPage() {
   return (
-    <div className="mx-auto w-full max-w-[1800px] overflow-x-hidden px-3 py-10 sm:px-4 lg:px-5 md:py-14">
+    <div className="mx-auto w-full max-w-[1800px] px-3 py-10 sm:px-4 lg:px-5 md:py-14">
       <motion.div variants={sectionFade} initial="hidden" animate="show" className="space-y-8">
         <div className="space-y-3">
           <Badge className="rounded-full bg-emerald-100 text-emerald-800 hover:bg-emerald-100">Solution</Badge>
@@ -772,9 +772,7 @@ function FinancePage() {
               <CardDescription>Monthly net cashflow and cumulative position over 24 months</CardDescription>
             </CardHeader>
             <CardContent className="h-[340px] p-2 sm:p-4">
-              <p className="mb-2 text-xs text-slate-500 md:hidden">Swipe left/right to view full chart</p>
-              <div className="h-full max-w-full overflow-x-auto overscroll-x-contain md:overflow-visible" style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-x pan-y' }}>
-                <div className="h-full min-w-[680px] md:min-w-0">
+              <div className="h-full w-full">
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={chartData}>
                       <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
@@ -786,7 +784,6 @@ function FinancePage() {
                       <Line type="monotone" dataKey="cumulative" stroke="#0f172a" strokeWidth={3} dot={false} name="Cumulative cashflow" />
                     </LineChart>
                   </ResponsiveContainer>
-                </div>
               </div>
             </CardContent>
           </Card>
@@ -831,9 +828,7 @@ function FinancePage() {
               <CardDescription>How sponsor revenue and plastic revenue combine over time</CardDescription>
             </CardHeader>
             <CardContent className="h-[400px] p-2 sm:p-4">
-              <p className="mb-2 text-xs text-slate-500 md:hidden">Swipe left/right to view full chart</p>
-              <div className="h-full max-w-full overflow-x-auto overscroll-x-contain md:overflow-visible" style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-x pan-y' }}>
-                <div className="h-full min-w-[680px] md:min-w-0">
+              <div className="h-full w-full">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={chartData}>
                       <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
@@ -845,7 +840,6 @@ function FinancePage() {
                       <Bar dataKey="sponsorRecurring" stackId="a" fill="#0ea5e9" name="Sponsor recurring" radius={[4, 4, 0, 0]} />
                     </BarChart>
                   </ResponsiveContainer>
-                </div>
               </div>
             </CardContent>
           </Card>
@@ -861,7 +855,7 @@ function FinancePage() {
               <div>
                 <div className="mb-3 text-sm font-medium text-slate-500">Initial setup</div>
                 <div className="overflow-x-auto overscroll-x-contain">
-                  <table className="w-full table-auto text-left text-sm">
+                  <table className="min-w-[760px] md:min-w-full table-auto text-left text-sm">
                     <thead>
                       <tr className="border-b border-emerald-100 text-slate-500">
                         <th className="px-2 py-2 font-medium whitespace-nowrap">Item</th>
@@ -894,7 +888,7 @@ function FinancePage() {
               <div>
                 <div className="mb-3 text-sm font-medium text-slate-500">Expansion stages</div>
                 <div className="overflow-x-auto overscroll-x-contain">
-                  <table className="w-full table-auto text-left text-sm">
+                  <table className="min-w-[860px] md:min-w-full table-auto text-left text-sm">
                     <thead>
                       <tr className="border-b border-sky-100 text-slate-500">
                         <th className="px-2 py-2 font-medium whitespace-nowrap">Stage</th>
@@ -930,7 +924,7 @@ function FinancePage() {
               <div>
                 <div className="mb-3 flex items-center gap-2 text-sm font-medium text-slate-500"><Truck className="h-4 w-4" /> Monthly operating cost</div>
                 <div className="overflow-x-auto overscroll-x-contain">
-                  <table className="w-full table-auto text-left text-sm">
+                  <table className="min-w-[980px] md:min-w-full table-auto text-left text-sm">
                     <thead>
                       <tr className="border-b border-slate-200 text-slate-500">
                         <th className="px-2 py-2 font-medium whitespace-nowrap">Stage</th>
@@ -962,7 +956,7 @@ function FinancePage() {
               <div>
                 <div className="mb-3 flex items-center gap-2 text-sm font-medium text-slate-500"><Landmark className="h-4 w-4" /> Sponsor income</div>
                 <div className="overflow-x-auto overscroll-x-contain">
-                  <table className="w-full table-auto text-left text-sm">
+                  <table className="min-w-[900px] md:min-w-full table-auto text-left text-sm">
                     <thead>
                       <tr className="border-b border-slate-200 text-slate-500">
                         <th className="px-2 py-2 font-medium whitespace-nowrap">Stage</th>
@@ -990,7 +984,7 @@ function FinancePage() {
               <div>
                 <div className="mb-3 flex items-center gap-2 text-sm font-medium text-slate-500"><Recycle className="h-4 w-4" /> Plastic revenue formula</div>
                 <div className="overflow-x-auto overscroll-x-contain">
-                  <table className="w-full table-auto text-left text-sm">
+                  <table className="min-w-[860px] md:min-w-full table-auto text-left text-sm">
                     <thead>
                       <tr className="border-b border-slate-200 text-slate-500">
                         <th className="px-2 py-2 font-medium whitespace-nowrap">Stage</th>
@@ -1119,9 +1113,7 @@ function FinancePage() {
                 <CardDescription>Shows how sponsor income and plastic revenue compare against monthly opex and capex</CardDescription>
               </CardHeader>
               <CardContent className="h-[280px] p-2 sm:p-4">
-                <p className="mb-2 text-xs text-slate-500 md:hidden">Swipe left/right to view full chart</p>
-                <div className="h-full max-w-full overflow-x-auto overscroll-x-contain md:overflow-visible" style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-x pan-y' }}>
-                  <div className="h-full min-w-[680px] md:min-w-0">
+                <div className="h-full w-full">
                     <ResponsiveContainer width="100%" height="100%">
                       <AreaChart data={chartData}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
@@ -1135,7 +1127,6 @@ function FinancePage() {
                         <Line type="monotone" dataKey="capex" stroke="#ef4444" strokeWidth={2} dot={false} name="Capex spike" />
                       </AreaChart>
                     </ResponsiveContainer>
-                  </div>
                 </div>
               </CardContent>
             </Card>
