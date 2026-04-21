@@ -4,18 +4,19 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { Leaf, Recycle, Waves, Users, ChartColumnIncreasing, DollarSign, MapPin, School, Bus, Camera, ArrowRight, Menu, X, CheckCircle2, TrendingUp, Factory, Landmark, Truck, Info } from 'lucide-react';
+import { Leaf, Recycle, Waves, Users, ChartColumnIncreasing, DollarSign, MapPin, School, Bus, Camera, ArrowRight, Menu, X, CheckCircle2, TrendingUp, Factory, Landmark, Truck, Info, ExternalLink, Lightbulb, Shield, Target, Heart } from 'lucide-react';
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, BarChart, Bar, Legend, AreaChart, Area } from 'recharts';
 
 const pages = [
   { id: 'home', label: 'Home' },
   { id: 'problem', label: 'Problem' },
+  { id: 'insights', label: 'Insights' },
   { id: 'solution', label: 'Solution' },
+  { id: 'why', label: 'Why It Works' },
   { id: 'plan', label: 'Implementation' },
   { id: 'outcome', label: 'Outcomes' },
   { id: 'finance', label: 'Finance' },
-  { id: 'team', label: 'Team' },
-  { id: 'gallery', label: 'Booth Gallery' },
+  { id: 'gallery', label: 'Gallery' },
   { id: 'faq', label: 'FAQ' },
 ];
 
@@ -1298,7 +1299,11 @@ export default function ProjectWebsite() {
         return <HomePage setCurrent={setCurrent} />;
       case 'problem':
         return <ProblemPage />;
+      case 'insights':
+        return <ProblemPage />;
       case 'solution':
+        return <SolutionPage />;
+      case 'why':
         return <SolutionPage />;
       case 'plan':
         return <PlanPage />;
@@ -1306,8 +1311,6 @@ export default function ProjectWebsite() {
         return <OutcomePage />;
       case 'finance':
         return <FinancePage />;
-      case 'team':
-        return <TeamPage />;
       case 'gallery':
         return <GalleryPage />;
       case 'faq':
