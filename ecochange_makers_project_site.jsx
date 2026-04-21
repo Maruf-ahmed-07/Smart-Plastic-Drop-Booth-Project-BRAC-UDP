@@ -4,19 +4,18 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { Leaf, Recycle, Waves, Users, ChartColumnIncreasing, DollarSign, MapPin, School, Bus, Camera, ArrowRight, Menu, X, CheckCircle2, TrendingUp, Factory, Landmark, Truck, Info, ExternalLink, Lightbulb, Shield, Target, Heart } from 'lucide-react';
+import { Leaf, Recycle, Waves, Users, ChartColumnIncreasing, DollarSign, MapPin, School, Bus, Camera, ArrowRight, Menu, X, CheckCircle2, TrendingUp, Factory, Landmark, Truck, Info } from 'lucide-react';
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, BarChart, Bar, Legend, AreaChart, Area } from 'recharts';
 
 const pages = [
   { id: 'home', label: 'Home' },
   { id: 'problem', label: 'Problem' },
-  { id: 'insights', label: 'Insights' },
   { id: 'solution', label: 'Solution' },
-  { id: 'why', label: 'Why It Works' },
   { id: 'plan', label: 'Implementation' },
   { id: 'outcome', label: 'Outcomes' },
   { id: 'finance', label: 'Finance' },
-  { id: 'gallery', label: 'Gallery' },
+  { id: 'team', label: 'Team' },
+  { id: 'gallery', label: 'Booth Gallery' },
   { id: 'faq', label: 'FAQ' },
 ];
 
@@ -30,7 +29,7 @@ function Nav({ current, setCurrent }) {
 
   return (
     <header className="sticky top-0 z-50 border-b border-emerald-100/80 bg-white/90 backdrop-blur">
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 md:px-6">
+      <div className="mx-auto flex w-full max-w-[1800px] items-center justify-between px-3 py-3 sm:px-4 lg:px-5">
         <button className="flex items-center gap-3 text-left" onClick={() => setCurrent('home')}>
           <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-emerald-600 text-white shadow-sm">
             <Recycle className="h-5 w-5" />
@@ -84,7 +83,7 @@ function Hero({ setCurrent }) {
   return (
     <section className="relative overflow-hidden">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(16,185,129,0.12),_transparent_35%),radial-gradient(circle_at_bottom_left,_rgba(14,165,233,0.12),_transparent_30%)]" />
-      <div className="relative mx-auto grid max-w-7xl gap-10 px-4 py-16 md:grid-cols-2 md:px-6 md:py-24">
+      <div className="relative mx-auto grid w-full max-w-[1800px] gap-10 px-3 py-16 sm:px-4 md:grid-cols-2 lg:px-5 md:py-24">
         <motion.div variants={sectionFade} initial="hidden" animate="show" className="flex flex-col justify-center gap-6">
           <Badge className="w-fit rounded-full bg-emerald-100 px-4 py-1 text-emerald-800 hover:bg-emerald-100">
             BRAC UDP x Team EcoChange Makers
@@ -167,7 +166,7 @@ function HomePage({ setCurrent }) {
     <div>
       <Hero setCurrent={setCurrent} />
 
-      <section className="mx-auto max-w-7xl px-4 py-8 md:px-6 md:py-12">
+      <section className="mx-auto w-full max-w-[1800px] px-3 py-8 sm:px-4 lg:px-5 md:py-12">
         <div className="grid gap-6 md:grid-cols-3">
           {[
             {
@@ -197,7 +196,7 @@ function HomePage({ setCurrent }) {
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-4 py-8 md:px-6 md:py-12">
+      <section className="mx-auto w-full max-w-[1800px] px-3 py-8 sm:px-4 lg:px-5 md:py-12">
         <Card className="rounded-[2rem] border-emerald-100 bg-slate-900 text-white shadow-none">
           <CardContent className="grid gap-6 p-8 md:grid-cols-[1.3fr_0.7fr] md:p-10">
             <div>
@@ -221,7 +220,7 @@ function HomePage({ setCurrent }) {
 
 function ProblemPage() {
   return (
-    <div className="mx-auto max-w-7xl overflow-x-hidden px-4 py-10 md:px-6 md:py-14">
+    <div className="mx-auto w-full max-w-[1800px] px-3 py-10 sm:px-4 lg:px-5 md:py-14">
       <motion.div variants={sectionFade} initial="hidden" animate="show" className="space-y-8">
         <div className="space-y-3">
           <Badge className="rounded-full bg-emerald-100 text-emerald-800 hover:bg-emerald-100">Problem Overview</Badge>
@@ -271,7 +270,7 @@ function ProblemPage() {
 
 function SolutionPage() {
   return (
-    <div className="mx-auto max-w-7xl overflow-x-hidden px-4 py-10 md:px-6 md:py-14">
+    <div className="mx-auto w-full max-w-[1800px] overflow-x-hidden px-3 py-10 sm:px-4 lg:px-5 md:py-14">
       <motion.div variants={sectionFade} initial="hidden" animate="show" className="space-y-8">
         <div className="space-y-3">
           <Badge className="rounded-full bg-emerald-100 text-emerald-800 hover:bg-emerald-100">Solution</Badge>
@@ -349,7 +348,7 @@ function PlanPage() {
   );
 
   return (
-    <div className="mx-auto max-w-7xl overflow-x-hidden px-4 py-10 md:px-6 md:py-14">
+    <div className="mx-auto w-full max-w-[1800px] overflow-x-hidden px-3 py-10 sm:px-4 lg:px-5 md:py-14">
       <motion.div variants={sectionFade} initial="hidden" animate="show" className="space-y-8">
         <div className="space-y-3">
           <Badge className="rounded-full bg-emerald-100 text-emerald-800 hover:bg-emerald-100">Implementation</Badge>
@@ -478,7 +477,7 @@ function OutcomePage() {
   ];
 
   return (
-    <div className="mx-auto max-w-7xl overflow-x-hidden px-4 py-10 md:px-6 md:py-14">
+    <div className="mx-auto w-full max-w-[1800px] overflow-x-hidden px-3 py-10 sm:px-4 lg:px-5 md:py-14">
       <motion.div variants={sectionFade} initial="hidden" animate="show" className="space-y-8">
         <div className="space-y-3">
           <Badge className="rounded-full bg-emerald-100 text-emerald-800 hover:bg-emerald-100">Expected Outcomes</Badge>
@@ -723,7 +722,7 @@ function FinancePage() {
   const currency = (n) => `Tk ${Number(n).toLocaleString()}`;
 
   return (
-    <div className="mx-auto max-w-7xl overflow-x-hidden px-4 py-10 md:px-6 md:py-14">
+    <div className="mx-auto w-full max-w-[1800px] overflow-x-hidden px-3 py-10 sm:px-4 lg:px-5 md:py-14">
       <motion.div variants={sectionFade} initial="hidden" animate="show" className="space-y-8">
         <div className="space-y-3">
           <Badge className="rounded-full bg-emerald-100 text-emerald-800 hover:bg-emerald-100">Finance</Badge>
@@ -773,17 +772,21 @@ function FinancePage() {
               <CardDescription>Monthly net cashflow and cumulative position over 24 months</CardDescription>
             </CardHeader>
             <CardContent className="h-[340px] p-2 sm:p-4">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={chartData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                  <XAxis dataKey="month" tick={{ fontSize: 12 }} />
-                  <YAxis tick={{ fontSize: 12 }} />
-                  <Tooltip formatter={(value) => currency(value)} />
-                  <Legend />
-                  <Line type="monotone" dataKey="net" stroke="#10b981" strokeWidth={3} dot={false} name="Monthly net cashflow" />
-                  <Line type="monotone" dataKey="cumulative" stroke="#0f172a" strokeWidth={3} dot={false} name="Cumulative cashflow" />
-                </LineChart>
-              </ResponsiveContainer>
+              <div className="h-full max-w-full overflow-x-auto overscroll-x-contain" style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-x pan-y' }}>
+                <div className="h-full min-w-[680px] lg:min-w-0">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={chartData}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                      <XAxis dataKey="month" tick={{ fontSize: 12 }} />
+                      <YAxis tick={{ fontSize: 12 }} />
+                      <Tooltip formatter={(value) => currency(value)} />
+                      <Legend />
+                      <Line type="monotone" dataKey="net" stroke="#10b981" strokeWidth={3} dot={false} name="Monthly net cashflow" />
+                      <Line type="monotone" dataKey="cumulative" stroke="#0f172a" strokeWidth={3} dot={false} name="Cumulative cashflow" />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </div>
@@ -824,17 +827,21 @@ function FinancePage() {
               <CardDescription>How sponsor revenue and plastic revenue combine over time</CardDescription>
             </CardHeader>
             <CardContent className="h-[400px] p-2 sm:p-4">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={chartData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                  <XAxis dataKey="month" tick={{ fontSize: 12 }} />
-                  <YAxis tick={{ fontSize: 12 }} />
-                  <Tooltip formatter={(value) => currency(value)} />
-                  <Legend />
-                  <Bar dataKey="plasticRevenue" stackId="a" fill="#10b981" name="Plastic revenue" radius={[4, 4, 0, 0]} />
-                  <Bar dataKey="sponsorRecurring" stackId="a" fill="#0ea5e9" name="Sponsor recurring" radius={[4, 4, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
+              <div className="h-full max-w-full overflow-x-auto overscroll-x-contain" style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-x pan-y' }}>
+                <div className="h-full min-w-[680px] lg:min-w-0">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={chartData}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                      <XAxis dataKey="month" tick={{ fontSize: 12 }} />
+                      <YAxis tick={{ fontSize: 12 }} />
+                      <Tooltip formatter={(value) => currency(value)} />
+                      <Legend />
+                      <Bar dataKey="plasticRevenue" stackId="a" fill="#10b981" name="Plastic revenue" radius={[4, 4, 0, 0]} />
+                      <Bar dataKey="sponsorRecurring" stackId="a" fill="#0ea5e9" name="Sponsor recurring" radius={[4, 4, 0, 0]} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </div>
@@ -1008,7 +1015,7 @@ function FinancePage() {
           </Card>
         </div>
 
-        <div className="grid gap-6 xl:grid-cols-2">
+        <div className="grid gap-6">
           <Card className="rounded-[2rem] border-emerald-100 shadow-none">
             <CardHeader>
               <CardTitle className="text-xl">Month-by-month 24-month cashflow</CardTitle>
@@ -1016,7 +1023,7 @@ function FinancePage() {
             </CardHeader>
             <CardContent className="overflow-hidden">
               <div className="max-h-[520px] max-w-full overflow-x-auto overflow-y-auto overscroll-contain rounded-2xl border border-emerald-100" style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-x pan-y' }}>
-                <table className="min-w-[980px] table-auto text-left text-[13px]">
+                <table className="min-w-[980px] 2xl:min-w-full table-auto text-left text-[13px]">
                   <thead className="sticky top-0 bg-white">
                     <tr className="border-b border-emerald-100 text-slate-500">
                       {['Month', 'Phase', 'Booths', 'Kg/day/booth', 'Monthly kg', 'Plastic revenue', 'Sponsor recurring', 'Sponsor support', 'Total inflow', 'Opex', 'Capex', 'Net', 'Cumulative'].map((h) => (
@@ -1048,36 +1055,14 @@ function FinancePage() {
             </CardContent>
           </Card>
 
-          <div className="grid gap-6">
-            <Card className="rounded-[2rem] border-sky-100 shadow-none">
-              <CardHeader>
-                <CardTitle className="text-xl">Inflow vs cost by month</CardTitle>
-                <CardDescription>Shows how sponsor income and plastic revenue compare against monthly opex and capex</CardDescription>
-              </CardHeader>
-              <CardContent className="h-[280px] p-2 sm:p-4">
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={chartData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                    <XAxis dataKey="month" tick={{ fontSize: 12 }} />
-                    <YAxis tick={{ fontSize: 12 }} />
-                    <Tooltip formatter={(value) => currency(value)} />
-                    <Legend />
-                    <Area type="monotone" dataKey="plasticRevenue" stackId="1" stroke="#10b981" fill="#10b981" fillOpacity={0.6} name="Plastic revenue" />
-                    <Area type="monotone" dataKey="sponsorRecurring" stackId="1" stroke="#0ea5e9" fill="#0ea5e9" fillOpacity={0.6} name="Sponsor recurring" />
-                    <Line type="monotone" dataKey="opex" stroke="#0f172a" strokeWidth={2} dot={false} name="Monthly opex" />
-                    <Line type="monotone" dataKey="capex" stroke="#ef4444" strokeWidth={2} dot={false} name="Capex spike" />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
-
-            <Card className="rounded-[2rem] border-emerald-100 shadow-none">
-              <CardHeader>
-                <CardTitle className="text-xl">Phase summary</CardTitle>
-                <CardDescription>Easy summary view for sponsors and reviewers</CardDescription>
-              </CardHeader>
-              <CardContent className="overflow-hidden">
-                <table className="w-full table-auto text-left text-sm">
+          <Card className="rounded-[2rem] border-emerald-100 shadow-none">
+            <CardHeader>
+              <CardTitle className="text-xl">Phase summary</CardTitle>
+              <CardDescription>Easy summary view for sponsors and reviewers</CardDescription>
+            </CardHeader>
+            <CardContent className="overflow-hidden">
+              <div className="max-w-full overflow-x-auto overscroll-x-contain rounded-2xl border border-emerald-100" style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-x pan-y' }}>
+                <table className="min-w-[920px] xl:min-w-full table-auto text-left text-sm">
                   <thead>
                     <tr className="border-b border-emerald-100 text-slate-500">
                       <th className="px-2 py-2 font-medium whitespace-nowrap">Phase</th>
@@ -1116,8 +1101,37 @@ function FinancePage() {
                     </tr>
                   </tbody>
                 </table>
+              </div>
+            </CardContent>
+          </Card>
+
+          <div className="grid gap-6">
+            <Card className="rounded-[2rem] border-sky-100 shadow-none">
+              <CardHeader>
+                <CardTitle className="text-xl">Inflow vs cost by month</CardTitle>
+                <CardDescription>Shows how sponsor income and plastic revenue compare against monthly opex and capex</CardDescription>
+              </CardHeader>
+              <CardContent className="h-[280px] p-2 sm:p-4">
+                <div className="h-full max-w-full overflow-x-auto overscroll-x-contain" style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-x pan-y' }}>
+                  <div className="h-full min-w-[680px] lg:min-w-0">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <AreaChart data={chartData}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                        <XAxis dataKey="month" tick={{ fontSize: 12 }} />
+                        <YAxis tick={{ fontSize: 12 }} />
+                        <Tooltip formatter={(value) => currency(value)} />
+                        <Legend />
+                        <Area type="monotone" dataKey="plasticRevenue" stackId="1" stroke="#10b981" fill="#10b981" fillOpacity={0.6} name="Plastic revenue" />
+                        <Area type="monotone" dataKey="sponsorRecurring" stackId="1" stroke="#0ea5e9" fill="#0ea5e9" fillOpacity={0.6} name="Sponsor recurring" />
+                        <Line type="monotone" dataKey="opex" stroke="#0f172a" strokeWidth={2} dot={false} name="Monthly opex" />
+                        <Line type="monotone" dataKey="capex" stroke="#ef4444" strokeWidth={2} dot={false} name="Capex spike" />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
               </CardContent>
             </Card>
+
           </div>
         </div>
       </motion.div>
@@ -1134,7 +1148,7 @@ function TeamPage() {
   ];
 
   return (
-    <div className="mx-auto max-w-7xl overflow-x-hidden px-4 py-10 md:px-6 md:py-14">
+    <div className="mx-auto w-full max-w-[1800px] overflow-x-hidden px-3 py-10 sm:px-4 lg:px-5 md:py-14">
       <motion.div variants={sectionFade} initial="hidden" animate="show" className="space-y-8">
         <div className="space-y-3">
           <Badge className="rounded-full bg-emerald-100 text-emerald-800 hover:bg-emerald-100">Team</Badge>
@@ -1194,7 +1208,7 @@ function GalleryPage() {
   ];
 
   return (
-    <div className="mx-auto max-w-7xl overflow-x-hidden px-4 py-10 md:px-6 md:py-14">
+    <div className="mx-auto w-full max-w-[1800px] overflow-x-hidden px-3 py-10 sm:px-4 lg:px-5 md:py-14">
       <motion.div variants={sectionFade} initial="hidden" animate="show" className="space-y-8">
         <div className="space-y-3">
           <Badge className="rounded-full bg-emerald-100 text-emerald-800 hover:bg-emerald-100">Booth Gallery</Badge>
@@ -1246,7 +1260,7 @@ function FAQPage() {
   ];
 
   return (
-    <div className="mx-auto max-w-7xl overflow-x-hidden px-4 py-10 md:px-6 md:py-14">
+    <div className="mx-auto w-full max-w-[1800px] overflow-x-hidden px-3 py-10 sm:px-4 lg:px-5 md:py-14">
       <motion.div variants={sectionFade} initial="hidden" animate="show" className="space-y-8">
         <div className="space-y-3">
           <Badge className="rounded-full bg-emerald-100 text-emerald-800 hover:bg-emerald-100">FAQ</Badge>
@@ -1271,7 +1285,7 @@ function FAQPage() {
 function Footer({ setCurrent }) {
   return (
     <footer className="border-t border-emerald-100 bg-white">
-      <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 md:grid-cols-[1fr_auto] md:px-6">
+      <div className="mx-auto grid w-full max-w-[1800px] gap-8 px-3 py-10 sm:px-4 md:grid-cols-[1fr_auto] lg:px-5">
         <div>
           <div className="text-lg font-semibold text-slate-900">Team EcoChange Makers</div>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
@@ -1299,11 +1313,7 @@ export default function ProjectWebsite() {
         return <HomePage setCurrent={setCurrent} />;
       case 'problem':
         return <ProblemPage />;
-      case 'insights':
-        return <ProblemPage />;
       case 'solution':
-        return <SolutionPage />;
-      case 'why':
         return <SolutionPage />;
       case 'plan':
         return <PlanPage />;
@@ -1311,6 +1321,8 @@ export default function ProjectWebsite() {
         return <OutcomePage />;
       case 'finance':
         return <FinancePage />;
+      case 'team':
+        return <TeamPage />;
       case 'gallery':
         return <GalleryPage />;
       case 'faq':
@@ -1325,7 +1337,7 @@ export default function ProjectWebsite() {
       <Nav current={current} setCurrent={setCurrent} />
       <main>{page}</main>
       <Separator className="bg-transparent" />
-      <section className="mx-auto max-w-7xl px-4 py-6 md:px-6">
+      <section className="mx-auto w-full max-w-[1800px] px-3 py-6 sm:px-4 lg:px-5">
         <div className="rounded-[2rem] border border-emerald-100 bg-white p-6 shadow-sm">
           <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
             <div>
