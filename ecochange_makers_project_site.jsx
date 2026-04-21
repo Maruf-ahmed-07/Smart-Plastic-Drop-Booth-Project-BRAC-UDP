@@ -772,8 +772,9 @@ function FinancePage() {
               <CardDescription>Monthly net cashflow and cumulative position over 24 months</CardDescription>
             </CardHeader>
             <CardContent className="h-[340px] p-2 sm:p-4">
-              <div className="h-full max-w-full overflow-x-auto overscroll-x-contain" style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-x pan-y' }}>
-                <div className="h-full min-w-[680px] lg:min-w-0">
+              <p className="mb-2 text-xs text-slate-500 md:hidden">Swipe left/right to view full chart</p>
+              <div className="h-full max-w-full overflow-x-auto overscroll-x-contain md:overflow-visible" style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-x pan-y' }}>
+                <div className="h-full min-w-[680px] md:min-w-0">
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={chartData}>
                       <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
@@ -798,26 +799,29 @@ function FinancePage() {
               <CardDescription>Every core input used in the model</CardDescription>
             </CardHeader>
             <CardContent className="overflow-hidden">
-              <table className="w-full table-auto text-left text-sm">
-                <thead>
-                  <tr className="border-b border-emerald-100 text-slate-500">
-                    <th className="px-2 py-2 font-medium whitespace-nowrap">Category</th>
-                    <th className="px-2 py-2 font-medium whitespace-nowrap">Item</th>
-                    <th className="px-2 py-2 font-medium whitespace-nowrap">Value used</th>
-                    <th className="px-2 py-2 font-medium whitespace-nowrap">Why</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {assumptions.map((row) => (
-                    <tr key={row.item} className="border-b border-slate-100 align-top">
-                      <td className="px-2 py-2 text-slate-500">{row.category}</td>
-                      <td className="px-2 py-2 font-medium text-slate-900">{row.item}</td>
-                      <td className="px-2 py-2 text-emerald-700">{row.value}</td>
-                      <td className="px-2 py-2 text-slate-600">{row.why}</td>
+              <p className="mb-2 text-xs text-slate-500 md:hidden">Swipe left/right to view full table</p>
+              <div className="max-w-full overflow-x-auto overscroll-x-contain" style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-x pan-y' }}>
+                <table className="min-w-[760px] md:min-w-full table-auto text-left text-xs sm:text-sm">
+                  <thead>
+                    <tr className="border-b border-emerald-100 text-slate-500">
+                      <th className="px-2 py-2 font-medium whitespace-nowrap">Category</th>
+                      <th className="px-2 py-2 font-medium whitespace-nowrap">Item</th>
+                      <th className="px-2 py-2 font-medium whitespace-nowrap">Value used</th>
+                      <th className="px-2 py-2 font-medium whitespace-nowrap">Why</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {assumptions.map((row) => (
+                      <tr key={row.item} className="border-b border-slate-100 align-top">
+                        <td className="px-2 py-2 text-slate-500">{row.category}</td>
+                        <td className="px-2 py-2 font-medium text-slate-900">{row.item}</td>
+                        <td className="px-2 py-2 text-emerald-700">{row.value}</td>
+                        <td className="px-2 py-2 text-slate-600">{row.why}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </CardContent>
           </Card>
 
@@ -827,8 +831,9 @@ function FinancePage() {
               <CardDescription>How sponsor revenue and plastic revenue combine over time</CardDescription>
             </CardHeader>
             <CardContent className="h-[400px] p-2 sm:p-4">
-              <div className="h-full max-w-full overflow-x-auto overscroll-x-contain" style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-x pan-y' }}>
-                <div className="h-full min-w-[680px] lg:min-w-0">
+              <p className="mb-2 text-xs text-slate-500 md:hidden">Swipe left/right to view full chart</p>
+              <div className="h-full max-w-full overflow-x-auto overscroll-x-contain md:overflow-visible" style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-x pan-y' }}>
+                <div className="h-full min-w-[680px] md:min-w-0">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={chartData}>
                       <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
@@ -1022,6 +1027,7 @@ function FinancePage() {
               <CardDescription>Full breakdown including setup, scale-up, recurring income, and cumulative position</CardDescription>
             </CardHeader>
             <CardContent className="overflow-hidden">
+              <p className="mb-2 text-xs text-slate-500 md:hidden">Swipe left/right to view all columns</p>
               <div className="max-h-[520px] max-w-full overflow-x-auto overflow-y-auto overscroll-contain rounded-2xl border border-emerald-100" style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-x pan-y' }}>
                 <table className="min-w-[980px] 2xl:min-w-full table-auto text-left text-[13px]">
                   <thead className="sticky top-0 bg-white">
@@ -1034,8 +1040,8 @@ function FinancePage() {
                   <tbody>
                     {monthlyRows.map((row) => (
                       <tr key={row.month} className={`border-b border-slate-100 ${row.month === 23 ? 'bg-emerald-50/70' : row.phase === 'Scale 2' ? 'bg-sky-50/25' : row.phase === 'Scale 1' ? 'bg-violet-50/25' : ''}`}>
-                        <td className="px-2 py-2 font-medium text-slate-900">{row.month}</td>
-                        <td className="px-2 py-2 text-slate-500">{row.phase}</td>
+                        <td className="sticky left-0 z-10 bg-white px-2 py-2 font-medium text-slate-900">{row.month}</td>
+                        <td className="sticky left-[48px] z-10 bg-white px-2 py-2 text-slate-500">{row.phase}</td>
                         <td className="px-2 py-2">{row.booths}</td>
                         <td className="px-2 py-2">{row.kgDay}</td>
                         <td className="px-2 py-2">{row.plasticKg.toLocaleString()}</td>
@@ -1061,6 +1067,7 @@ function FinancePage() {
               <CardDescription>Easy summary view for sponsors and reviewers</CardDescription>
             </CardHeader>
             <CardContent className="overflow-hidden">
+              <p className="mb-2 text-xs text-slate-500 md:hidden">Swipe left/right to view all columns</p>
               <div className="max-w-full overflow-x-auto overscroll-x-contain rounded-2xl border border-emerald-100" style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-x pan-y' }}>
                 <table className="min-w-[920px] xl:min-w-full table-auto text-left text-sm">
                   <thead>
@@ -1112,8 +1119,9 @@ function FinancePage() {
                 <CardDescription>Shows how sponsor income and plastic revenue compare against monthly opex and capex</CardDescription>
               </CardHeader>
               <CardContent className="h-[280px] p-2 sm:p-4">
-                <div className="h-full max-w-full overflow-x-auto overscroll-x-contain" style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-x pan-y' }}>
-                  <div className="h-full min-w-[680px] lg:min-w-0">
+                <p className="mb-2 text-xs text-slate-500 md:hidden">Swipe left/right to view full chart</p>
+                <div className="h-full max-w-full overflow-x-auto overscroll-x-contain md:overflow-visible" style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-x pan-y' }}>
+                  <div className="h-full min-w-[680px] md:min-w-0">
                     <ResponsiveContainer width="100%" height="100%">
                       <AreaChart data={chartData}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
