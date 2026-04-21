@@ -221,7 +221,7 @@ function HomePage({ setCurrent }) {
 function ProblemPage() {
   return (
     <div className="mx-auto w-full max-w-[1800px] px-3 py-10 sm:px-4 lg:px-5 md:py-14">
-      <motion.div variants={sectionFade} initial="hidden" animate="show" className="space-y-8">
+        <motion.div variants={sectionFade} initial="hidden" animate="show" className="space-y-8">
         <div className="space-y-3">
           <Badge className="rounded-full bg-emerald-100 text-emerald-800 hover:bg-emerald-100">Problem Overview</Badge>
           <h1 className="text-4xl font-semibold tracking-tight text-slate-900">Why plastic waste in Cox’s Bazar needs a new response</h1>
@@ -271,7 +271,7 @@ function ProblemPage() {
 function SolutionPage() {
   return (
     <div className="mx-auto w-full max-w-[1800px] px-3 py-10 sm:px-4 lg:px-5 md:py-14">
-      <motion.div variants={sectionFade} initial="hidden" animate="show" className="space-y-8">
+        <motion.div variants={sectionFade} initial="hidden" animate="show" className="space-y-8">
         <div className="space-y-3">
           <Badge className="rounded-full bg-emerald-100 text-emerald-800 hover:bg-emerald-100">Solution</Badge>
           <h1 className="text-4xl font-semibold tracking-tight text-slate-900">Smart Plastic Drop Booth</h1>
@@ -477,7 +477,7 @@ function OutcomePage() {
   ];
 
   return (
-    <div className="mx-auto w-full max-w-[1800px] overflow-x-hidden px-3 py-10 sm:px-4 lg:px-5 md:py-14">
+    <div className="mx-auto w-full max-w-[1800px] px-3 py-10 sm:px-4 lg:px-5 md:py-14">
       <motion.div variants={sectionFade} initial="hidden" animate="show" className="space-y-8">
         <div className="space-y-3">
           <Badge className="rounded-full bg-emerald-100 text-emerald-800 hover:bg-emerald-100">Expected Outcomes</Badge>
@@ -1121,8 +1121,8 @@ function FinancePage() {
                   <tbody>
                     {monthlyRows.map((row) => (
                       <tr key={row.month} className={`border-b border-slate-100 ${row.month === 23 ? 'bg-emerald-50/70' : row.phase === 'Scale 2' ? 'bg-sky-50/25' : row.phase === 'Scale 1' ? 'bg-violet-50/25' : ''}`}>
-                        <td className="sticky left-0 z-10 bg-white px-2 py-2 font-medium text-slate-900 shadow-[1px_0_0_0_rgba(226,232,240,1)]">{row.month}</td>
-                        <td className="sticky left-[48px] z-10 bg-white px-2 py-2 text-slate-500 shadow-[1px_0_0_0_rgba(226,232,240,1)]">{row.phase}</td>
+                        <td className="px-2 py-2 font-medium text-slate-900 md:sticky md:left-0 md:z-10 md:bg-white md:shadow-[1px_0_0_0_rgba(226,232,240,1)]">{row.month}</td>
+                        <td className="px-2 py-2 text-slate-500 md:sticky md:left-[48px] md:z-10 md:bg-white md:shadow-[1px_0_0_0_rgba(226,232,240,1)]">{row.phase}</td>
                         <td className="px-2 py-2">{row.booths}</td>
                         <td className="px-2 py-2">{row.kgDay}</td>
                         <td className="px-2 py-2">{row.plasticKg.toLocaleString()}</td>
@@ -1150,7 +1150,7 @@ function FinancePage() {
             <CardContent className="overflow-hidden p-3 sm:p-6">
               <p className="mb-2 text-xs text-slate-500 md:hidden">Swipe left/right to view all columns</p>
               <div className="max-w-full overflow-x-auto overflow-y-hidden overscroll-x-contain rounded-2xl border border-emerald-100" style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-x pan-y' }}>
-                <table className="min-w-[920px] xl:min-w-full table-auto text-left text-sm">
+                <table className="min-w-[1020px] xl:min-w-full table-auto text-left text-sm">
                   <thead>
                     <tr className="border-b border-emerald-100 text-slate-500">
                       <th className="px-2 py-2 font-medium whitespace-nowrap">Phase</th>
@@ -1199,7 +1199,7 @@ function FinancePage() {
                 <CardTitle className="text-xl">Inflow vs cost by month</CardTitle>
                 <CardDescription>Shows how sponsor income and plastic revenue compare against monthly opex and capex</CardDescription>
               </CardHeader>
-              <CardContent className="h-[240px] sm:h-[280px] p-2 sm:p-4">
+              <CardContent className="h-[220px] sm:h-[280px] p-2 sm:p-4">
                 <div className="h-full w-full">
                     <ResponsiveContainer width="100%" height="100%">
                       <AreaChart data={chartData}>
