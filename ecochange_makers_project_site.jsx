@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Leaf, Recycle, Waves, Users, ChartColumnIncreasing, DollarSign, MapPin, School, Bus, Camera, ArrowRight, Menu, X, CheckCircle2, TrendingUp, Factory, Landmark, Truck, Info } from 'lucide-react';
-import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, BarChart, Bar, Legend, AreaChart, Area } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, BarChart, Bar, Legend, AreaChart, Area } from 'recharts';
 
 const pages = [
   { id: 'home', label: 'Home' },
@@ -116,45 +116,88 @@ function Nav({ current, setCurrent }) {
 
 function MobileHorizontalScroll({ children, className = '', contentClassName = '' }) {
   const scrollRef = useRef(null);
-  const touchStateRef = useRef({ startX: 0, startY: 0, scrollLeft: 0, axis: null });
+  const dragStateRef = useRef({ active: false, pointerId: null, startX: 0, scrollLeft: 0 });
 
-  const handleTouchStart = (event) => {
-    const touch = event.touches[0];
-    touchStateRef.current = {
-      startX: touch.clientX,
-      startY: touch.clientY,
-      scrollLeft: scrollRef.current?.scrollLeft ?? 0,
-      axis: null,
-    };
-  };
-
-  const handleTouchMove = (event) => {
+  const handlePointerDown = (event) => {
     const container = scrollRef.current;
     if (!container) return;
 
-    const touch = event.touches[0];
-    const deltaX = touch.clientX - touchStateRef.current.startX;
-    const deltaY = touch.clientY - touchStateRef.current.startY;
+    dragStateRef.current = {
+      active: true,
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      scrollLeft: container.scrollLeft,
+    };
+    container.setPointerCapture?.(event.pointerId);
+  };
 
-    if (!touchStateRef.current.axis) {
-      touchStateRef.current.axis = Math.abs(deltaX) > Math.abs(deltaY) ? 'x' : 'y';
-    }
+  const handlePointerMove = (event) => {
+    const container = scrollRef.current;
+    const dragState = dragStateRef.current;
+    if (!container || !dragState.active || dragState.pointerId !== event.pointerId) return;
 
-    if (touchStateRef.current.axis !== 'x') return;
+    const deltaX = event.clientX - dragState.startX;
+    container.scrollLeft = dragState.scrollLeft - deltaX;
+  };
 
-    event.preventDefault();
-    container.scrollLeft = touchStateRef.current.scrollLeft - deltaX;
+  const handlePointerEnd = (event) => {
+    const container = scrollRef.current;
+    if (!container || dragStateRef.current.pointerId !== event.pointerId) return;
+
+    dragStateRef.current = { active: false, pointerId: null, startX: 0, scrollLeft: 0 };
+    container.releasePointerCapture?.(event.pointerId);
   };
 
   return (
     <div
       ref={scrollRef}
       className={`w-full overflow-x-auto overflow-y-hidden overscroll-x-contain ${className}`}
-      onTouchStart={handleTouchStart}
-      onTouchMove={handleTouchMove}
-      style={{ WebkitOverflowScrolling: 'touch' }}
+      onPointerDown={handlePointerDown}
+      onPointerMove={handlePointerMove}
+      onPointerUp={handlePointerEnd}
+      onPointerCancel={handlePointerEnd}
+      style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-y pinch-zoom' }}
     >
       <div className={contentClassName}>{children}</div>
+    </div>
+  );
+}
+
+function MeasuredChart({ className = '', minHeight = 200, children }) {
+  const containerRef = useRef(null);
+  const [size, setSize] = useState({ width: 0, height: minHeight });
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return undefined;
+
+    const updateSize = () => {
+      const width = Math.max(0, Math.round(container.clientWidth));
+      const height = Math.max(minHeight, Math.round(container.clientHeight));
+      setSize({ width, height });
+    };
+
+    updateSize();
+
+    if (typeof ResizeObserver !== 'undefined') {
+      const observer = new ResizeObserver(() => updateSize());
+      observer.observe(container);
+
+      return () => observer.disconnect();
+    }
+
+    window.addEventListener('resize', updateSize);
+    const frameId = window.requestAnimationFrame(updateSize);
+
+    return () => {
+      window.removeEventListener('resize', updateSize);
+      window.cancelAnimationFrame(frameId);
+    };
+  }, [minHeight]);
+
+  return (
+    <div ref={containerRef} className={className}>
+      {size.width > 0 && size.height > 0 ? children(size) : null}
     </div>
   );
 }
@@ -265,9 +308,11 @@ function HomePage({ setCurrent }) {
               text: 'Smart Plastic Drop Booths make proper disposal visible, easy, and compatible with the existing collection chain already used by BRAC UDP.',
             },
           ].map((item) => (
-            <Card key={item.title} className="rounded-3xl border-emerald-100 shadow-none">
+            <Card key={item.title} className="rounded-3xl border-emerald-100 bg-white/95 shadow-none">
               <CardContent className="p-6">
-                <item.icon className="mb-4 h-9 w-9 text-emerald-600" />
+                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50">
+                  <item.icon className="h-7 w-7 text-emerald-600" />
+                </div>
                 <h3 className="mb-2 text-xl font-semibold text-slate-900">{item.title}</h3>
                 <p className="text-sm leading-6 text-slate-600">{item.text}</p>
               </CardContent>
@@ -277,22 +322,180 @@ function HomePage({ setCurrent }) {
       </section>
 
       <section className="mx-auto w-full max-w-[1800px] px-3 py-8 sm:px-4 lg:px-5 md:py-12">
-        <Card className="rounded-[2rem] border-emerald-100 bg-slate-900 text-white shadow-none">
-          <CardContent className="grid gap-6 p-8 md:grid-cols-[1.3fr_0.7fr] md:p-10">
-            <div>
-              <div className="mb-3 text-sm font-medium tracking-wide text-emerald-300">Why this project matters</div>
-              <h2 className="text-3xl font-semibold">Not just awareness — a system that keeps working</h2>
-              <p className="mt-4 max-w-3xl text-sm leading-7 text-slate-300">
+        <Card className="overflow-hidden rounded-[2rem] border-emerald-200 bg-[linear-gradient(135deg,#f0fdf4_0%,#ecfeff_45%,#f8fafc_100%)] text-slate-900 shadow-[0_24px_60px_rgba(16,185,129,0.12)]">
+          <CardContent className="relative grid gap-6 p-8 md:grid-cols-[1.3fr_0.7fr] md:p-10">
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(16,185,129,0.16),transparent_26%),radial-gradient(circle_at_bottom_left,rgba(14,165,233,0.10),transparent_24%)]" />
+            <div className="relative">
+              <div className="mb-3 text-sm font-medium tracking-wide text-emerald-700">Why this project matters</div>
+              <h2 className="text-3xl font-semibold text-slate-900">Not just awareness — a system that keeps working</h2>
+              <p className="mt-4 max-w-3xl text-sm leading-7 text-slate-700">
                 Team EcoChange Makers developed this concept to move beyond one-time campaigns. The project focuses on behavior, visibility, and a financial model that can sustain operations through moderate sponsorship and recovered plastic value.
               </p>
+              <div className="mt-6 grid gap-3 sm:grid-cols-3">
+                {[
+                  ['Works with BRAC UDP chain', 'Builds on the existing collection and recycling path instead of replacing it.'],
+                  ['Designed for daily habit', 'Makes the right action visible and easy in places people already use.'],
+                  ['Built to scale carefully', 'Starts with a pilot, proves viability, and expands only after learning.'],
+                ].map(([title, text]) => (
+                  <div key={title} className="rounded-2xl border border-emerald-100 bg-white/80 p-4 backdrop-blur-sm">
+                    <div className="text-sm font-semibold text-slate-900">{title}</div>
+                    <div className="mt-2 text-xs leading-6 text-slate-600">{text}</div>
+                  </div>
+                ))}
+              </div>
             </div>
-            <div className="grid gap-3">
+            <div className="relative grid gap-3">
               {['Low-cost to pilot', 'Fits existing waste chain', 'Supports sponsor visibility', 'Designed for long-term use'].map((x) => (
-                <div key={x} className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-100">{x}</div>
+                <div key={x} className="rounded-2xl border border-emerald-100 bg-white/85 px-4 py-3 text-sm text-slate-800 backdrop-blur-sm">{x}</div>
               ))}
+              <div className="rounded-2xl border border-emerald-200 bg-emerald-50/90 p-4">
+                <div className="text-xs font-medium tracking-wide text-emerald-700">What changes on the ground</div>
+                <div className="mt-3 grid gap-3">
+                  {[
+                    ['4→10→30', 'Booth scale path'],
+                    ['Month 23', 'Break-even target'],
+                    ['Plastic-only', 'Segregation focus'],
+                    ['Sponsor-backed', 'Operating model'],
+                  ].map(([value, label]) => (
+                    <div key={value + label} className="rounded-xl bg-white/80 p-3">
+                      <div className="text-lg font-semibold text-slate-900">{value}</div>
+                      <div className="text-xs text-slate-600">{label}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           </CardContent>
         </Card>
+      </section>
+    </div>
+  );
+}
+
+function HomeLandingPage({ setCurrent }) {
+  return (
+    <div>
+      <Hero setCurrent={setCurrent} />
+
+      <section className="mx-auto w-full max-w-[1800px] px-3 py-8 sm:px-4 lg:px-5 md:py-12">
+        <div className="grid gap-6 md:grid-cols-3">
+          {[
+            {
+              icon: Waves,
+              title: 'The challenge',
+              text: "Cox's Bazar faces rising plastic waste due to tourism, population pressure, and leakage into drains, land, and marine environments.",
+            },
+            {
+              icon: Users,
+              title: 'The insight',
+              text: 'Awareness exists, but action is difficult. Low-value plastics like thin poly are often ignored because they lack value and easy collection points.',
+            },
+            {
+              icon: Recycle,
+              title: 'The response',
+              text: 'Smart Plastic Drop Booths make proper disposal visible, easy, and compatible with the existing collection chain already used by BRAC UDP.',
+            },
+          ].map((item) => (
+            <Card key={item.title} className="rounded-3xl border-emerald-100 bg-white/95 shadow-none">
+              <CardContent className="p-6">
+                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50">
+                  <item.icon className="h-7 w-7 text-emerald-600" />
+                </div>
+                <h3 className="mb-2 text-xl font-semibold text-slate-900">{item.title}</h3>
+                <p className="text-sm leading-6 text-slate-600">{item.text}</p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </section>
+
+      <section className="mx-auto w-full max-w-[1800px] px-3 py-8 sm:px-4 lg:px-5 md:py-12">
+        <Card className="overflow-hidden rounded-[2rem] border-emerald-200 bg-[linear-gradient(135deg,#f0fdf4_0%,#ecfeff_45%,#f8fafc_100%)] text-slate-900 shadow-[0_24px_60px_rgba(16,185,129,0.12)]">
+          <CardContent className="relative grid gap-6 p-8 md:grid-cols-[1.3fr_0.7fr] md:p-10">
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(16,185,129,0.16),transparent_26%),radial-gradient(circle_at_bottom_left,rgba(14,165,233,0.10),transparent_24%)]" />
+            <div className="relative">
+              <div className="mb-3 text-sm font-medium tracking-wide text-emerald-700">Why this project matters</div>
+              <h2 className="text-3xl font-semibold text-slate-900">Not just awareness - a system that keeps working</h2>
+              <p className="mt-4 max-w-3xl text-sm leading-7 text-slate-700">
+                Team EcoChange Makers developed this concept to move beyond one-time campaigns. The project focuses on behavior, visibility, and a financial model that can sustain operations through moderate sponsorship and recovered plastic value.
+              </p>
+              <div className="mt-6 grid gap-3 sm:grid-cols-3">
+                {[
+                  ['Works with BRAC UDP chain', 'Builds on the existing collection and recycling path instead of replacing it.'],
+                  ['Designed for daily habit', 'Makes the right action visible and easy in places people already use.'],
+                  ['Built to scale carefully', 'Starts with a pilot, proves viability, and expands only after learning.'],
+                ].map(([title, text]) => (
+                  <div key={title} className="rounded-2xl border border-emerald-100 bg-white/80 p-4 backdrop-blur-sm">
+                    <div className="text-sm font-semibold text-slate-900">{title}</div>
+                    <div className="mt-2 text-xs leading-6 text-slate-600">{text}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="relative grid gap-3">
+              {['Low-cost to pilot', 'Fits existing waste chain', 'Supports sponsor visibility', 'Designed for long-term use'].map((x) => (
+                <div key={x} className="rounded-2xl border border-emerald-100 bg-white/85 px-4 py-3 text-sm text-slate-800 backdrop-blur-sm">{x}</div>
+              ))}
+              <div className="rounded-2xl border border-emerald-200 bg-emerald-50/90 p-4">
+                <div className="text-xs font-medium tracking-wide text-emerald-700">What changes on the ground</div>
+                <div className="mt-3 grid gap-3">
+                  {[
+                    ['Public action becomes clearer', 'People see one simple plastic-only action instead of guessing where waste should go.'],
+                    ['Collectors get cleaner material flow', 'Plastic arrives in a more usable stream instead of being buried inside mixed roadside waste.'],
+                    ['Sponsors fund visible public value', 'Support is tied to a booth network people actually see and use every day.'],
+                  ].map(([title, text]) => (
+                    <div key={title} className="rounded-xl bg-white/80 p-3">
+                      <div className="text-sm font-semibold text-slate-900">{title}</div>
+                      <div className="mt-1 text-xs leading-6 text-slate-600">{text}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </section>
+
+      <section className="mx-auto w-full max-w-[1800px] px-3 py-8 sm:px-4 lg:px-5 md:py-12">
+        <div className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
+          <Card className="rounded-[2rem] border-emerald-100 shadow-none">
+            <CardHeader>
+              <CardTitle className="text-2xl">What makes this solution practical</CardTitle>
+              <CardDescription>Built for implementation, not just presentation</CardDescription>
+            </CardHeader>
+            <CardContent className="grid gap-3 text-sm leading-6 text-slate-600">
+              {[
+                'It improves an existing waste chain instead of asking communities to adopt a totally new system.',
+                'It starts with a manageable pilot, so the team can test real usage before expanding.',
+                'It combines behavioral design with financial logic, making the system easier to sustain over time.',
+                'It fits visible everyday locations such as schools, roadside areas, and beach-adjacent public spaces.',
+              ].map((item) => (
+                <div key={item} className="rounded-2xl bg-emerald-50/60 p-4">{item}</div>
+              ))}
+            </CardContent>
+          </Card>
+
+          <Card className="rounded-[2rem] border-sky-100 shadow-none">
+            <CardHeader>
+              <CardTitle className="text-2xl">Project journey at a glance</CardTitle>
+              <CardDescription>How the idea moves from issue to implementation</CardDescription>
+            </CardHeader>
+            <CardContent className="grid gap-4 md:grid-cols-2">
+              {[
+                ['Problem', 'Low-value plastic keeps escaping the normal collection system and damaging beaches, drains, and public space.'],
+                ['Insight', 'People need a disposal option that is clear, visible, and easy enough to use every day.'],
+                ['System', 'Smart Plastic Drop Booths connect public action with collectors, aggregators, and the BRAC recycling facility.'],
+                ['Growth', 'A sponsor-backed rollout helps move the model from pilot to a wider booth network.'],
+              ].map(([title, text], index) => (
+                <div key={title} className="rounded-2xl border border-sky-100 bg-sky-50/50 p-5">
+                  <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-full bg-sky-600 text-sm font-semibold text-white">{index + 1}</div>
+                  <div className="text-lg font-semibold text-slate-900">{title}</div>
+                  <div className="mt-2 text-sm leading-6 text-slate-600">{text}</div>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        </div>
       </section>
     </div>
   );
@@ -348,15 +551,230 @@ function ProblemPage() {
   );
 }
 
-function SolutionPage() {
+function ProblemShowcasePage() {
+  const problemHighlights = [
+    {
+      title: 'Silent beach killers',
+      subtitle: 'Marine wildlife and shoreline plastic',
+      image: '/images/turtle under water.png',
+      alt: 'Sea turtle underwater near plastic waste',
+      description:
+        'On beaches and in shallow coastal water, thin plastic and floating fragments become deadly because animals do not read them as waste. Sea turtles mistake drifting bags for food, seabirds swallow fragments while foraging, and discarded lines or bags trap animals before anyone notices.',
+      details: [
+        'The danger is often slow rather than sudden: internal blockage, starvation, injury, and exhaustion.',
+        'Once litter reaches the waterline, even lightweight plastic becomes part of the marine hazard zone.',
+      ],
+    },
+    {
+      title: 'Ocean shorelines of death',
+      subtitle: 'How beach litter turns into offshore harm',
+      image: '/images/beach wasted by poly.png',
+      alt: 'Plastic litter scattered across a beach',
+      description:
+        'What looks like ordinary litter on the sand does not stay still. Wind, tides, and stormwater move bags, wrappers, and fragments into the sea, where they mimic prey, tangle wildlife, and spread through a much larger ecological area than the original dumping point.',
+      details: [
+        'A polluted shoreline is not only a visual problem; it is the starting point of repeated damage offshore.',
+        'This is why beach waste management matters even before plastic fully enters deeper marine ecosystems.',
+      ],
+    },
+    {
+      title: 'Agricultural crops and farm systems',
+      subtitle: 'Plastic leakage beyond the coast',
+      image: '/images/agricultural crops and farm sytems damaged by poly.png',
+      alt: 'Plastic waste affecting crops and farm systems',
+      description:
+        'Thin poly bags do not only threaten beaches. In farm settings they catch on fencing, block irrigation lines, choke emerging seedlings, and mix into productive land. Plastic also creates risk for cattle and other animals that graze or scavenge near fields and waste edges.',
+      details: [
+        'The result is both environmental damage and disruption to livelihoods tied to farming systems.',
+        'Low-value plastic becomes costly when it interferes with food production and animal safety.',
+      ],
+    },
+    {
+      title: 'Elevated treetop and bird habitats',
+      subtitle: 'Plastic trapped above eye level',
+      image: '/images/ated treetop and bird habitats.png',
+      alt: 'Plastic bags entangled in treetop branches',
+      description:
+        'In urban and peri-urban trees, plastic bags can remain tangled for weeks like ghost-white streamers. This degrades the visual environment, disrupts nesting spaces, and turns ordinary roadside trees into long-term storage points for waste that should never have escaped the system.',
+      details: [
+        'The problem matters because it shows how easily light plastic travels and how hard it is to recover once it rises into branches.',
+        'It also reveals that plastic pollution is not confined to drains or bins; it occupies living habitats.',
+      ],
+    },
+    {
+      title: 'Urban infrastructure and clogged drains',
+      subtitle: 'Plastic as a service failure',
+      image: '/images/cloged drain.png',
+      alt: 'Drain blocked by plastic waste during rainfall',
+      description:
+        'In dense urban areas, plastic waste blocks drain inlets, reduces water flow, and worsens flooding during rainfall. This turns discarded polythene from an environmental nuisance into a direct threat to mobility, sanitation, and public health.',
+      details: [
+        'When drains choke, the cost is carried by roads, homes, businesses, and emergency response systems.',
+        'Plastic pollution therefore damages not just ecosystems, but also essential urban services.',
+      ],
+    },
+    {
+      title: 'Riverbanks and terrestrial bird scavenging',
+      subtitle: 'Mud, shallow water, and entanglement',
+      image: '/images/Terrestrial Bird Scavenging.png',
+      alt: 'Bird scavenging near plastic waste on a muddy riverbank',
+      description:
+        'Semi-aquatic and terrestrial scavenger birds are also exposed when they forage in muddy riverbanks and shallow water. Thin plastic can catch on legs, wrap around feet, or trail behind birds as they move, making normal feeding behavior risky and stressful.',
+      details: [
+        'This extends the problem beyond iconic marine species to everyday urban and river-edge wildlife.',
+        'It also shows how plastic spreads across connected land-water environments rather than staying in one place.',
+      ],
+    },
+    {
+      title: 'Tourism waste and visual pollution',
+      subtitle: 'Packaging on the world’s longest beach',
+      image: '/images/Tourism Waste & Visual Pollution Street Snack Litter.png',
+      alt: 'Tourism snack packaging waste on Cox’s Bazar beach',
+      description:
+        'Cox’s Bazar faces heavy tourism pressure, and snack packaging waste is part of that daily reality. Thin clear poly bags used for beachside snacks are easy to carry, easy to drop, and easy for wind to scatter into driftwood, dunes, drains, and the water’s edge.',
+      details: [
+        'This weakens the visitor experience while adding a constant stream of low-value plastic into sensitive public space.',
+        'Tourism does not just increase volume; it increases the speed at which visible litter returns after cleanup.',
+      ],
+    },
+  ];
+
+  const rootProblems = [
+    {
+      icon: MapPin,
+      title: 'High-pressure location',
+      text: 'Cox’s Bazar carries unusual pressure from tourism, dense local activity, and environmentally sensitive coastal space, so small failures in disposal quickly become large visible problems.',
+    },
+    {
+      icon: Recycle,
+      title: 'Value-driven collection gap',
+      text: 'The existing chain captures plastics that have resale value, but thin low-value poly is far easier to ignore, which leaves a major leakage stream outside efficient collection.',
+    },
+    {
+      icon: Users,
+      title: 'Awareness-action disconnect',
+      text: 'Many people understand plastic pollution is harmful, yet daily behavior does not change when disposal remains inconvenient, mixed, or unclear in public spaces.',
+    },
+    {
+      icon: Waves,
+      title: 'Leakage across systems',
+      text: 'Plastic does not stay in one place. It moves from roads to drains, from drains to beaches, and from beaches to marine and river ecosystems, multiplying harm along the way.',
+    },
+  ];
+
   return (
     <div className="mx-auto w-full max-w-[1800px] px-3 py-10 sm:px-4 lg:px-5 md:py-14">
-        <motion.div variants={sectionFade} initial="hidden" animate="show" className="space-y-8">
+      <motion.div variants={sectionFade} initial="hidden" animate="show" className="space-y-8">
+        <div className="space-y-3">
+          <Badge className="rounded-full bg-emerald-100 text-emerald-800 hover:bg-emerald-100">Problem Overview</Badge>
+          <h1 className="text-4xl font-semibold tracking-tight text-slate-900">Why plastic waste in Cox's Bazar needs a new response</h1>
+          <p className="max-w-5xl text-base leading-7 text-slate-600">
+            The challenge is not only that plastic waste exists, but that low-value plastic keeps escaping the points where collection should happen. In Cox's Bazar, that leakage shows up on beaches, in drains, around public roads, in ecological habitats, and across systems that were never designed to absorb constant plastic spread.
+          </p>
+        </div>
+
+        <Card className="overflow-hidden rounded-[2rem] border-emerald-100 shadow-none">
+          <CardContent className="grid gap-6 p-0 lg:grid-cols-[1.05fr_0.95fr]">
+            <div className="bg-slate-900 p-8 text-white md:p-10">
+              <div className="mb-3 text-sm font-medium tracking-wide text-emerald-300">What makes this problem different</div>
+              <h2 className="text-3xl font-semibold">Plastic leakage is damaging ecology, public space, and infrastructure at the same time</h2>
+              <p className="mt-4 max-w-3xl text-sm leading-7 text-slate-300">
+                This is why a normal waste discussion is not enough. The same low-value plastic can begin as dropped litter, become drain blockage, travel into the shoreline, and then continue into marine or river ecosystems. A weak response at the beginning creates consequences across multiple environments later.
+              </p>
+            </div>
+            <div className="grid gap-3 p-6 md:grid-cols-2 md:p-8">
+              {rootProblems.map((item) => (
+                <div key={item.title} className="rounded-2xl border border-emerald-100 bg-white p-5">
+                  <item.icon className="mb-3 h-8 w-8 text-emerald-600" />
+                  <div className="text-lg font-semibold text-slate-900">{item.title}</div>
+                  <p className="mt-2 text-sm leading-6 text-slate-600">{item.text}</p>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        <div className="grid gap-6">
+          {problemHighlights.map((item, index) => (
+            <Card key={item.title} className="overflow-hidden rounded-[2rem] border-emerald-100 shadow-none">
+              <CardContent className="grid gap-0 p-0 lg:grid-cols-[0.95fr_1.05fr]">
+                <div className={`${index % 2 === 0 ? 'lg:order-1' : 'lg:order-2'} min-h-[280px]`}>
+                  <img src={item.image} alt={item.alt} className="h-full w-full object-cover" />
+                </div>
+                <div className={`${index % 2 === 0 ? 'lg:order-2' : 'lg:order-1'} p-6 sm:p-8`}>
+                  <div className="mb-2 text-sm font-medium tracking-wide text-emerald-700">{item.subtitle}</div>
+                  <h2 className="text-2xl font-semibold text-slate-900">{item.title}</h2>
+                  <p className="mt-4 text-sm leading-7 text-slate-600">{item.description}</p>
+                  <div className="mt-5 grid gap-3">
+                    {item.details.map((detail) => (
+                      <div key={detail} className="rounded-2xl bg-emerald-50/60 p-4 text-sm leading-6 text-slate-700">{detail}</div>
+                    ))}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </motion.div>
+    </div>
+  );
+}
+
+function SolutionPage() {
+  const solutionVisuals = [
+    {
+      title: 'Booth model concept',
+      subtitle: 'Core design of the Smart Plastic Drop Booth',
+      image: '/images/booth model photo.png',
+      alt: 'Model concept image of the Smart Plastic Drop Booth',
+      description:
+        'This model image represents the proposed booth itself: a dedicated plastic-only drop point designed to be clear, visible, and easy for the public to understand at first glance.',
+    },
+    {
+      title: 'Real-world use example',
+      subtitle: 'How the booth works in a practical public setting',
+      image: '/images/solution 1.png',
+      alt: 'Real-world example of the Smart Plastic Drop Booth in use',
+      description:
+        'This example shows how the booth can operate in an actual public environment, helping people dispose of polythene and plastic separately instead of mixing it into ordinary bins.',
+    },
+    {
+      title: 'Attention, usability, and sponsor visibility',
+      subtitle: 'Design cues that make the system work',
+      image: '/images/solution 2 with indication.png',
+      alt: 'Smart Plastic Drop Booth showing design indications and sponsor branding',
+      description:
+        'This image highlights how attractive design, clear indications, and sponsor branding work together. The booth becomes easier to notice, easier to understand, and more valuable as a visible public-interest asset.',
+    },
+  ];
+
+  const solutionPillars = [
+    {
+      title: 'Plastic-only action point',
+      text: 'The booth removes ambiguity by telling people exactly what belongs inside, improving segregation at the earliest possible stage.',
+    },
+    {
+      title: 'Visible and attractive design',
+      text: 'A more noticeable public object creates stronger attention than an ordinary waste bin and supports repeated habit formation.',
+    },
+    {
+      title: 'Compatible with the existing chain',
+      text: 'Collected plastic still flows through collectors, aggregators, and the BRAC recycling pathway instead of forcing a separate system.',
+    },
+    {
+      title: 'Sponsor-supported sustainability',
+      text: 'Branding space on the booth helps turn visibility into operating support, making scaling more realistic over time.',
+    },
+  ];
+
+  return (
+    <div className="mx-auto w-full max-w-[1800px] px-3 py-10 sm:px-4 lg:px-5 md:py-14">
+      <motion.div variants={sectionFade} initial="hidden" animate="show" className="space-y-8">
         <div className="space-y-3">
           <Badge className="rounded-full bg-emerald-100 text-emerald-800 hover:bg-emerald-100">Solution</Badge>
           <h1 className="text-4xl font-semibold tracking-tight text-slate-900">Smart Plastic Drop Booth</h1>
-          <p className="max-w-4xl text-base leading-7 text-slate-600">
-            A plastic-only drop point designed for schools and public areas, created to make proper disposal easy, visible, and compatible with the existing waste collection system.
+          <p className="max-w-5xl text-base leading-7 text-slate-600">
+            The Smart Plastic Drop Booth is the projectâ€™s core solution: a plastic-only public collection point designed to make disposal more visible, easier to understand, and better connected to the existing BRAC UDP waste chain.
           </p>
         </div>
 
@@ -400,6 +818,255 @@ function SolutionPage() {
             </CardContent>
           </Card>
         </div>
+
+        <Card className="overflow-hidden rounded-[2rem] border-emerald-100 shadow-none">
+          <CardContent className="grid gap-6 p-0 lg:grid-cols-[1.05fr_0.95fr]">
+            <div className="bg-[linear-gradient(135deg,#ecfdf5_0%,#f0fdfa_50%,#f8fafc_100%)] p-8 md:p-10">
+              <div className="mb-3 text-sm font-medium tracking-wide text-emerald-700">How the solution works in context</div>
+              <h2 className="text-3xl font-semibold text-slate-900">A booth is useful only when design, location, and system linkage work together</h2>
+              <p className="mt-4 max-w-3xl text-sm leading-7 text-slate-700">
+                The proposed booth is not just a container. It is a behavior-guiding public object. Its shape, labeling, and branding all help users understand that this is a plastic-only drop point, while its placement and collection logic keep it connected to real waste operations.
+              </p>
+              <div className="mt-6 grid gap-3 sm:grid-cols-2">
+                {solutionPillars.map((item) => (
+                  <div key={item.title} className="rounded-2xl border border-emerald-100 bg-white/80 p-4">
+                    <div className="text-sm font-semibold text-slate-900">{item.title}</div>
+                    <div className="mt-2 text-xs leading-6 text-slate-600">{item.text}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="grid gap-3 p-6 md:p-8">
+              {[
+                ['Location logic', 'The booth works best where people already move daily: school entries, roadside public space, and visible coastal areas.'],
+                ['Behavior logic', 'The clearer the action, the more likely people are to repeat it without needing repeated awareness campaigns.'],
+                ['Collection logic', 'Once the booth gathers cleaner plastic separately, collectors and aggregators can work with a more organized stream.'],
+              ].map(([title, text]) => (
+                <div key={title} className="rounded-2xl border border-sky-100 bg-sky-50/60 p-5">
+                  <div className="text-lg font-semibold text-slate-900">{title}</div>
+                  <div className="mt-2 text-sm leading-6 text-slate-600">{text}</div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        <div className="grid gap-6">
+          {solutionVisuals.map((item, index) => (
+            <Card key={item.title} className="overflow-hidden rounded-[2rem] border-emerald-100 shadow-none">
+              <CardContent className="grid gap-0 p-0 lg:grid-cols-[0.95fr_1.05fr]">
+                <div className={`${index % 2 === 0 ? 'lg:order-1' : 'lg:order-2'} min-h-[280px]`}>
+                  <img src={item.image} alt={item.alt} className="h-full w-full object-cover" />
+                </div>
+                <div className={`${index % 2 === 0 ? 'lg:order-2' : 'lg:order-1'} p-6 sm:p-8`}>
+                  <div className="mb-2 text-sm font-medium tracking-wide text-emerald-700">{item.subtitle}</div>
+                  <h2 className="text-2xl font-semibold text-slate-900">{item.title}</h2>
+                  <p className="mt-4 text-sm leading-7 text-slate-600">{item.description}</p>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        <div className="grid gap-6 lg:grid-cols-3">
+          {[
+            {
+              title: 'Why the booth grabs attention',
+              text: 'A normal waste bin blends into the street. A more attractive, intentionally branded booth stands out visually and creates a stronger pause for action.',
+            },
+            {
+              title: 'Why collection becomes easier',
+              text: 'Because the booth is plastic-only, users do less sorting mentally and collectors receive a stream that is cleaner than ordinary mixed roadside waste.',
+            },
+            {
+              title: 'Why sponsor branding matters',
+              text: 'Branding adds financial purpose to public visibility. Sponsors support a booth that people can see, use, and associate with cleaner public space.',
+            },
+          ].map((item) => (
+            <Card key={item.title} className="rounded-3xl border-emerald-100 shadow-none">
+              <CardContent className="p-6">
+                <div className="text-xl font-semibold text-slate-900">{item.title}</div>
+                <p className="mt-3 text-sm leading-6 text-slate-600">{item.text}</p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </motion.div>
+    </div>
+  );
+}
+
+function SolutionShowcasePage() {
+  const solutionVisuals = [
+    {
+      title: 'Booth model concept',
+      subtitle: 'Core design of the Smart Plastic Drop Booth',
+      image: '/images/booth model photo.png',
+      alt: 'Model concept image of the Smart Plastic Drop Booth',
+      description:
+        'This model image represents the proposed booth itself: a dedicated plastic-only drop point designed to be clear, visible, and easy for the public to understand at first glance.',
+    },
+    {
+      title: 'Real-world use example',
+      subtitle: 'How the booth works in a practical public setting',
+      image: '/images/solution 1.png',
+      alt: 'Real-world example of the Smart Plastic Drop Booth in use',
+      description:
+        'This example shows how the booth can operate in an actual public environment, helping people dispose of polythene and plastic separately instead of mixing it into ordinary bins.',
+    },
+    {
+      title: 'Attention, usability, and sponsor visibility',
+      subtitle: 'Design cues that make the system work',
+      image: '/images/solution 2 with indication.png',
+      alt: 'Smart Plastic Drop Booth showing design indications and sponsor branding',
+      description:
+        'This image highlights how attractive design, clear indications, and sponsor branding work together. The booth becomes easier to notice, easier to understand, and more valuable as a visible public-interest asset.',
+    },
+  ];
+
+  const solutionPillars = [
+    {
+      title: 'Plastic-only action point',
+      text: 'The booth removes ambiguity by telling people exactly what belongs inside, improving segregation at the earliest possible stage.',
+    },
+    {
+      title: 'Visible and attractive design',
+      text: 'A more noticeable public object creates stronger attention than an ordinary waste bin and supports repeated habit formation.',
+    },
+    {
+      title: 'Compatible with the existing chain',
+      text: 'Collected plastic still flows through collectors, aggregators, and the BRAC recycling pathway instead of forcing a separate system.',
+    },
+    {
+      title: 'Sponsor-supported sustainability',
+      text: 'Branding space on the booth helps turn visibility into operating support, making scaling more realistic over time.',
+    },
+  ];
+
+  return (
+    <div className="mx-auto w-full max-w-[1800px] px-3 py-10 sm:px-4 lg:px-5 md:py-14">
+      <motion.div variants={sectionFade} initial="hidden" animate="show" className="space-y-8">
+        <div className="space-y-3">
+          <Badge className="rounded-full bg-emerald-100 text-emerald-800 hover:bg-emerald-100">Solution</Badge>
+          <h1 className="text-4xl font-semibold tracking-tight text-slate-900">Smart Plastic Drop Booth</h1>
+          <p className="max-w-5xl text-base leading-7 text-slate-600">
+            The Smart Plastic Drop Booth is the project's core solution: a plastic-only public collection point designed to make disposal more visible, easier to understand, and better connected to the existing BRAC UDP waste chain.
+          </p>
+        </div>
+
+        <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+          <Card className="rounded-[2rem] border-emerald-100 shadow-none">
+            <CardHeader>
+              <CardTitle className="text-xl">Why this idea was chosen</CardTitle>
+              <CardDescription>Built as a long-term system, not a one-time campaign</CardDescription>
+            </CardHeader>
+            <CardContent className="grid gap-4 text-sm leading-6 text-slate-600 sm:grid-cols-2">
+              {[
+                'Low-cost compared with large infrastructure ideas',
+                'Easy for households and students to understand',
+                'Supports early segregation of plastic',
+                'Does not replace collectors or aggregators',
+                'Can grow through sponsor support over time',
+                'Turns awareness into a repeatable daily action',
+              ].map((t) => (
+                <div key={t} className="rounded-2xl bg-emerald-50/70 p-4">{t}</div>
+              ))}
+            </CardContent>
+          </Card>
+
+          <Card className="rounded-[2rem] border-sky-100 shadow-none">
+            <CardHeader>
+              <CardTitle className="text-xl">How it is different from a normal bin</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4 text-sm leading-6 text-slate-600">
+              <div className="rounded-2xl border border-sky-100 p-4">
+                <div className="mb-1 font-medium text-slate-900">Normal roadside bins</div>
+                <p>Mix all waste together, reduce recycling quality, and do not create a clear action for plastic separation.</p>
+              </div>
+              <div className="rounded-2xl border border-emerald-100 bg-emerald-50/50 p-4">
+                <div className="mb-1 font-medium text-slate-900">Smart Plastic Drop Booths</div>
+                <p>Are plastic-only, more visible, clearly labeled, and designed to guide behavior. They help users understand exactly what to do.</p>
+              </div>
+              <div className="rounded-2xl border border-slate-200 p-4">
+                <div className="mb-1 font-medium text-slate-900">Behavior effect</div>
+                <p>When the correct action is obvious and easy, people are more likely to repeat it. That repeated action becomes habit over time.</p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="grid gap-6">
+          {solutionVisuals.map((item, index) => (
+            <Card key={item.title} className="overflow-hidden rounded-[2rem] border-emerald-100 shadow-none">
+              <CardContent className="grid gap-0 p-0 lg:grid-cols-[0.95fr_1.05fr]">
+                <div className={`${index % 2 === 0 ? 'lg:order-1' : 'lg:order-2'} min-h-[280px]`}>
+                  <img src={item.image} alt={item.alt} className="h-full w-full object-cover" />
+                </div>
+                <div className={`${index % 2 === 0 ? 'lg:order-2' : 'lg:order-1'} p-6 sm:p-8`}>
+                  <div className="mb-2 text-sm font-medium tracking-wide text-emerald-700">{item.subtitle}</div>
+                  <h2 className="text-2xl font-semibold text-slate-900">{item.title}</h2>
+                  <p className="mt-4 text-sm leading-7 text-slate-600">{item.description}</p>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        <div className="grid gap-6 lg:grid-cols-3">
+          {[
+            {
+              title: 'Why the booth grabs attention',
+              text: 'A normal waste bin blends into the street. A more attractive, intentionally branded booth stands out visually and creates a stronger pause for action.',
+            },
+            {
+              title: 'Why collection becomes easier',
+              text: 'Because the booth is plastic-only, users do less sorting mentally and collectors receive a stream that is cleaner than ordinary mixed roadside waste.',
+            },
+            {
+              title: 'Why sponsor branding matters',
+              text: 'Branding adds financial purpose to public visibility. Sponsors support a booth that people can see, use, and associate with cleaner public space.',
+            },
+          ].map((item) => (
+            <Card key={item.title} className="rounded-3xl border-emerald-100 shadow-none">
+              <CardContent className="p-6">
+                <div className="text-xl font-semibold text-slate-900">{item.title}</div>
+                <p className="mt-3 text-sm leading-6 text-slate-600">{item.text}</p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        <Card className="overflow-hidden rounded-[2rem] border-emerald-100 shadow-none">
+          <CardContent className="grid gap-6 p-0 lg:grid-cols-[1.05fr_0.95fr]">
+            <div className="bg-[linear-gradient(135deg,#ecfdf5_0%,#f0fdfa_50%,#f8fafc_100%)] p-8 md:p-10">
+              <div className="mb-3 text-sm font-medium tracking-wide text-emerald-700">How the solution works in context</div>
+              <h2 className="text-3xl font-semibold text-slate-900">A booth is useful only when design, location, and system linkage work together</h2>
+              <p className="mt-4 max-w-3xl text-sm leading-7 text-slate-700">
+                The proposed booth is not just a container. It is a behavior-guiding public object. Its shape, labeling, and branding all help users understand that this is a plastic-only drop point, while its placement and collection logic keep it connected to real waste operations.
+              </p>
+              <div className="mt-6 grid gap-3 sm:grid-cols-2">
+                {solutionPillars.map((item) => (
+                  <div key={item.title} className="rounded-2xl border border-emerald-100 bg-white/80 p-4">
+                    <div className="text-sm font-semibold text-slate-900">{item.title}</div>
+                    <div className="mt-2 text-xs leading-6 text-slate-600">{item.text}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="grid gap-3 p-6 md:p-8">
+              {[
+                ['Location logic', 'The booth works best where people already move daily: school entries, roadside public space, and visible coastal areas.'],
+                ['Behavior logic', 'The clearer the action, the more likely people are to repeat it without needing repeated awareness campaigns.'],
+                ['Collection logic', 'Once the booth gathers cleaner plastic separately, collectors and aggregators can work with a more organized stream.'],
+              ].map(([title, text]) => (
+                <div key={title} className="rounded-2xl border border-sky-100 bg-sky-50/60 p-5">
+                  <div className="text-lg font-semibold text-slate-900">{title}</div>
+                  <div className="mt-2 text-sm leading-6 text-slate-600">{text}</div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
       </motion.div>
     </div>
   );
@@ -427,16 +1094,85 @@ function PlanPage() {
     []
   );
 
+  const implementationSteps = [
+    {
+      title: 'Site preparation and booth placement',
+      text: 'The first visible step is careful placement. Booths are positioned where daily movement already exists, including roadsides, community-facing public areas, and school-adjacent locations. This makes the booth part of existing routines rather than a separate system people must go out of their way to use.',
+      image: '/images/putting down the booth on road side.png',
+      alt: 'Booths being placed on a roadside and in public areas',
+    },
+    {
+      title: 'Public use and habit formation',
+      text: 'Once installed, the booth starts doing its most important work: making plastic-only disposal easy to understand. Students and general users can identify the action quickly, which supports repeated use and helps build a visible disposal habit over time.',
+      image: '/images/student putting poly inside.png',
+      alt: 'Students putting poly inside the booth',
+    },
+    {
+      title: 'Collection, transfer, and route efficiency',
+      text: 'Collectors then gather the separated plastic from booth locations and move it using their existing local transport methods. This is where the booth connects with real waste operations, helping create a cleaner, more organized stream than mixed roadside disposal.',
+      image: '/images/collectors are collecting from booth and puthing on their vehicle.png',
+      alt: 'Collectors taking plastic from the booth and loading it onto a vehicle',
+    },
+    {
+      title: 'Pre-processing and onward movement',
+      text: 'After collection, the plastic can be consolidated in a simple local yard before moving further into the recycling chain. The compressed bale stage shows that the system is not only collecting scattered low-value plastic, but concentrating it into a form that is easier to handle, transport, and value within the broader chain.',
+      image: '/images/collection and preprocess.png',
+      alt: 'Compressed bale of collected thin poly plastic bags in a local pre-processing yard',
+    },
+  ];
+
+  const implementationPrinciples = [
+    ['Start with visible, manageable sites', 'Implementation begins with a limited number of locations so the team can observe real behavior, booth usage, and collection reliability before expanding.'],
+    ['Use existing actors, not a parallel system', 'Collectors, aggregators, and the wider BRAC-linked chain remain part of the process. The booth strengthens the system instead of replacing it.'],
+    ['Improve convenience before expecting behavior change', 'The booth is designed to reduce friction. Clear labeling, attractive design, and easy access are treated as operational tools, not decoration.'],
+    ['Scale only when the route works', 'Expansion depends on whether placement, collection, and sponsor support work together in practice, not just whether the idea looks good on paper.'],
+  ];
+
   return (
     <div className="mx-auto w-full max-w-[1800px] px-3 py-10 sm:px-4 lg:px-5 md:py-14">
       <motion.div variants={sectionFade} initial="hidden" animate="show" className="space-y-8">
         <div className="space-y-3">
           <Badge className="rounded-full bg-emerald-100 text-emerald-800 hover:bg-emerald-100">Implementation</Badge>
           <h1 className="text-4xl font-semibold tracking-tight text-slate-900">How the project will be implemented</h1>
-          <p className="max-w-4xl text-base leading-7 text-slate-600">
-            The project is designed to scale gradually. The plan starts small, validates the system in real life, and then expands based on performance rather than assumption.
+          <p className="max-w-5xl text-base leading-7 text-slate-600">
+            The implementation plan is designed to move from visible public placement to routine collection and onward processing. Instead of assuming success at full scale, the project begins with manageable deployment, observes how people actually use the booths, and then expands only when the system proves workable in the field.
           </p>
         </div>
+
+        <Card className="overflow-hidden rounded-[2rem] border-emerald-100 shadow-none">
+          <CardContent className="grid gap-6 p-0 lg:grid-cols-[1.05fr_0.95fr]">
+            <div className="bg-[linear-gradient(135deg,#ecfdf5_0%,#f0fdfa_42%,#f8fafc_100%)] p-8 md:p-10">
+              <div className="text-sm font-semibold uppercase tracking-[0.22em] text-emerald-700">Implementation logic</div>
+              <h2 className="mt-3 text-3xl font-semibold tracking-tight text-slate-900">A workable rollout depends on placement, use, collection, and processing all linking together</h2>
+              <p className="mt-4 max-w-3xl text-sm leading-7 text-slate-700">
+                The booth is only the visible front end of the solution. Implementation succeeds when communities can notice and use it easily, collectors can pick up material without extra friction, and the collected plastic can move into a more organized downstream stream. This page shows that full path from deployment to pre-processing.
+              </p>
+              <div className="mt-6 grid gap-3 sm:grid-cols-2">
+                {implementationPrinciples.map(([title, text]) => (
+                  <div key={title} className="rounded-2xl border border-emerald-100 bg-white/80 p-4">
+                    <div className="text-sm font-semibold text-slate-900">{title}</div>
+                    <div className="mt-2 text-xs leading-6 text-slate-600">{text}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="grid gap-0">
+              <div className="aspect-[16/11] overflow-hidden border-b border-emerald-100 bg-emerald-50/60">
+                <img
+                  src="/images/booth implementation flow.png"
+                  alt="Implementation flow for the Smart Plastic Drop Booth system"
+                  className="h-full w-full object-cover"
+                />
+              </div>
+              <div className="p-6 md:p-8">
+                <div className="text-lg font-semibold text-slate-900">Implementation flow overview</div>
+                <p className="mt-3 text-sm leading-7 text-slate-600">
+                  This flow shows the intended movement of the system: public-facing booth deployment, real user interaction, routine local collection, and transfer into a more manageable plastic stream. It highlights that implementation is not a single event, but a chain of connected actions that must stay simple enough to repeat.
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
         <div className="grid gap-4 md:grid-cols-3">
           {phases.map((phase, index) => (
@@ -448,6 +1184,31 @@ function PlanPage() {
               <CardContent>
                 <div className="mb-3 inline-flex rounded-full bg-emerald-50 px-3 py-1 text-sm font-medium text-emerald-700">{phase.booths}</div>
                 <p className="text-sm leading-6 text-slate-600">{phase.detail}</p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        <div className="space-y-3">
+          <h2 className="text-2xl font-semibold tracking-tight text-slate-900">From deployment to material recovery</h2>
+          <p className="max-w-5xl text-sm leading-7 text-slate-600 sm:text-base">
+            These implementation visuals show how the booth moves through real-life stages: first being placed in public space, then being used by people, then collected by the existing system, and finally consolidated into a more workable material stream.
+          </p>
+        </div>
+
+        <div className="grid gap-6 lg:grid-cols-2">
+          {implementationSteps.map((step) => (
+            <Card key={step.title} className="overflow-hidden rounded-[2rem] border-sky-100 shadow-none">
+              <div className="aspect-[16/10] overflow-hidden bg-[linear-gradient(135deg,rgba(16,185,129,0.12),rgba(14,165,233,0.12))]">
+                <img
+                  src={step.image}
+                  alt={step.alt}
+                  className="h-full w-full object-cover"
+                />
+              </div>
+              <CardContent className="p-6">
+                <h3 className="text-xl font-semibold text-slate-900">{step.title}</h3>
+                <p className="mt-3 text-sm leading-7 text-slate-600">{step.text}</p>
               </CardContent>
             </Card>
           ))}
@@ -469,6 +1230,23 @@ function PlanPage() {
                 <div className="mb-2 flex h-8 w-8 items-center justify-center rounded-full bg-sky-600 text-sm font-semibold text-white">{n}</div>
                 {t}
               </div>
+            ))}
+          </CardContent>
+        </Card>
+
+        <Card className="rounded-[2rem] border-emerald-100 shadow-none">
+          <CardHeader>
+            <CardTitle className="text-xl">What implementation needs to prove</CardTitle>
+            <CardDescription>The project should demonstrate more than installation alone</CardDescription>
+          </CardHeader>
+          <CardContent className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+            {[
+              'People can recognize the booth as a plastic-only disposal point without needing repeated explanation.',
+              'Collectors can include booth pickup in a realistic route without disrupting existing earning logic.',
+              'Separated low-value plastic can be consolidated into a cleaner stream that is easier to move forward.',
+              'The booth remains visible enough in public space to support daily use, sponsor value, and long-term habit formation.',
+            ].map((item) => (
+              <div key={item} className="rounded-2xl bg-emerald-50/60 p-4 text-sm leading-6 text-slate-700">{item}</div>
             ))}
           </CardContent>
         </Card>
@@ -595,8 +1373,9 @@ function OutcomePage() {
               <CardDescription>Illustrative view of network scale, plastic flow, visibility, and sponsor readiness</CardDescription>
             </CardHeader>
             <CardContent className="h-[340px] p-2 sm:p-4">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={outcomeChartData}>
+              <MeasuredChart className="h-full w-full min-w-0 min-h-[308px]" minHeight={308}>
+                {({ width, height }) => (
+                <LineChart width={width} height={height} data={outcomeChartData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
                   <XAxis dataKey="stage" tick={{ fontSize: 12 }} />
                   <YAxis tick={{ fontSize: 12 }} />
@@ -606,7 +1385,8 @@ function OutcomePage() {
                   <Line type="monotone" dataKey="visibilityScore" stroke="#0ea5e9" strokeWidth={3} name="Visibility / behavior signal" />
                   <Line type="monotone" dataKey="sponsorReadiness" stroke="#0f172a" strokeWidth={3} name="Sponsor readiness score" />
                 </LineChart>
-              </ResponsiveContainer>
+                )}
+              </MeasuredChart>
             </CardContent>
           </Card>
         </div>
@@ -867,9 +1647,9 @@ function FinancePage() {
               <CardDescription>Monthly net cashflow and cumulative position over 24 months</CardDescription>
             </CardHeader>
             <CardContent className="h-[280px] sm:h-[340px] p-2 sm:p-4">
-              <div className="h-full w-full min-w-0 min-h-[264px]">
-                  <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={264}>
-                    <LineChart data={chartData}>
+              <MeasuredChart className="h-full w-full min-w-0 min-h-[264px]" minHeight={264}>
+                  {({ width, height }) => (
+                    <LineChart width={width} height={height} data={chartData}>
                       <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
                       <XAxis dataKey="month" tick={{ fontSize: 12 }} />
                       <YAxis tick={{ fontSize: 12 }} />
@@ -878,8 +1658,8 @@ function FinancePage() {
                       <Line type="monotone" dataKey="net" stroke="#10b981" strokeWidth={3} dot={false} name="Monthly net cashflow" />
                       <Line type="monotone" dataKey="cumulative" stroke="#0f172a" strokeWidth={3} dot={false} name="Cumulative cashflow" />
                     </LineChart>
-                  </ResponsiveContainer>
-              </div>
+                  )}
+              </MeasuredChart>
             </CardContent>
           </Card>
         </div>
@@ -932,9 +1712,9 @@ function FinancePage() {
               <CardDescription>How sponsor revenue and plastic revenue combine over time</CardDescription>
             </CardHeader>
             <CardContent className="h-[280px] sm:h-[400px] p-2 sm:p-4">
-              <div className="h-full w-full min-w-0 min-h-[264px]">
-                  <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={264}>
-                    <BarChart data={chartData}>
+              <MeasuredChart className="h-full w-full min-w-0 min-h-[264px]" minHeight={264}>
+                  {({ width, height }) => (
+                    <BarChart width={width} height={height} data={chartData}>
                       <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
                       <XAxis dataKey="month" tick={{ fontSize: 12 }} />
                       <YAxis tick={{ fontSize: 12 }} />
@@ -943,8 +1723,8 @@ function FinancePage() {
                       <Bar dataKey="plasticRevenue" stackId="a" fill="#10b981" name="Plastic revenue" radius={[4, 4, 0, 0]} />
                       <Bar dataKey="sponsorRecurring" stackId="a" fill="#0ea5e9" name="Sponsor recurring" radius={[4, 4, 0, 0]} />
                     </BarChart>
-                  </ResponsiveContainer>
-              </div>
+                  )}
+              </MeasuredChart>
             </CardContent>
           </Card>
         </div>
@@ -1369,8 +2149,9 @@ function FinancePage() {
               <CardContent className="h-[220px] overflow-hidden p-2 sm:h-[280px] sm:p-4">
                   {isMobileView ? (
                   <MobileHorizontalScroll className="h-full rounded-2xl" contentClassName="h-full w-max min-w-[920px] min-h-[204px]">
-                      <ResponsiveContainer width="100%" height="100%" minWidth={920} minHeight={204}>
-                        <AreaChart data={chartData}>
+                      <MeasuredChart className="h-full w-full min-w-[920px] min-h-[204px]" minHeight={204}>
+                        {({ width, height }) => (
+                        <AreaChart width={width} height={height} data={chartData}>
                           <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
                           <XAxis dataKey="month" tick={{ fontSize: 12 }} />
                           <YAxis tick={{ fontSize: 12 }} />
@@ -1381,12 +2162,13 @@ function FinancePage() {
                           <Line type="monotone" dataKey="opex" stroke="#0f172a" strokeWidth={2} dot={false} name="Monthly opex" />
                           <Line type="monotone" dataKey="capex" stroke="#ef4444" strokeWidth={2} dot={false} name="Capex spike" />
                         </AreaChart>
-                      </ResponsiveContainer>
+                        )}
+                      </MeasuredChart>
                   </MobileHorizontalScroll>
                   ) : (
-                  <div className="h-full w-full min-w-0 min-h-[204px]">
-                    <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={204}>
-                      <AreaChart data={chartData}>
+                  <MeasuredChart className="h-full w-full min-w-0 min-h-[204px]" minHeight={204}>
+                    {({ width, height }) => (
+                      <AreaChart width={width} height={height} data={chartData}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
                         <XAxis dataKey="month" tick={{ fontSize: 12 }} />
                         <YAxis tick={{ fontSize: 12 }} />
@@ -1397,8 +2179,8 @@ function FinancePage() {
                         <Line type="monotone" dataKey="opex" stroke="#0f172a" strokeWidth={2} dot={false} name="Monthly opex" />
                         <Line type="monotone" dataKey="capex" stroke="#ef4444" strokeWidth={2} dot={false} name="Capex spike" />
                       </AreaChart>
-                    </ResponsiveContainer>
-                </div>
+                    )}
+                  </MeasuredChart>
                   )}
               </CardContent>
             </Card>
@@ -1410,12 +2192,178 @@ function FinancePage() {
   );
 }
 
+function TeamShowcasePage() {
+  const members = [
+    {
+      name: 'MD Maruf Ahmed',
+      image: '/images/maruf.jpg',
+      alt: 'Portrait of MD Maruf Ahmed',
+    },
+    {
+      name: 'Mahedi Mostafa Rifat',
+      image: '/images/mehedi.png',
+      alt: 'Portrait of Mahedi Mostafa Rifat',
+    },
+    {
+      name: 'Mayesha Ann-Noor Nishma',
+      image: '/images/mayesha.png',
+      alt: 'Portrait of Mayesha Ann-Noor Nishma',
+    },
+    {
+      name: 'Mir Sajid Hussain',
+      image: '/images/sajid.png',
+      alt: 'Portrait of Mir Sajid Hussain',
+    },
+  ];
+
+  const acknowledgements = [
+    {
+      name: 'Neealana Naushin',
+      role: 'Lecturer',
+      org: 'School of General Education, BRAC University',
+      note: 'We are grateful for her guidance, encouragement, and thoughtful academic support throughout the development of this project.',
+      image: '/images/nealana mam.png',
+      alt: 'Portrait of Neealana Naushin',
+      accent: 'from-emerald-100/90 via-white to-sky-100/90',
+    },
+    {
+      name: 'Rukhsar Sultana',
+      role: 'Manager, Partnership & Private Sector Engagement',
+      org: 'BRAC',
+      note: 'We also thank our project sponsor for the support and partnership perspective that helped connect the concept with real implementation thinking.',
+      image: '/images/Rukhsar mam.png',
+      alt: 'Portrait of Rukhsar Sultana',
+      accent: 'from-sky-100/90 via-white to-emerald-100/90',
+    },
+  ];
+
+  return (
+    <div className="mx-auto w-full max-w-[1800px] overflow-x-hidden px-3 py-10 sm:px-4 lg:px-5 md:py-14">
+      <motion.div variants={sectionFade} initial="hidden" animate="show" className="space-y-10">
+        <div className="space-y-3">
+          <Badge className="rounded-full bg-emerald-100 text-emerald-800 hover:bg-emerald-100">Team</Badge>
+          <h1 className="text-4xl font-semibold tracking-tight text-slate-900">Team EcoChange Makers</h1>
+          <p className="max-w-4xl text-base leading-7 text-slate-600">
+            This project was developed by Team EcoChange Makers as a practical, sponsor-aware, and behavior-driven response to the plastic waste challenge in Cox&apos;s Bazar.
+          </p>
+        </div>
+
+        <Card className="overflow-hidden rounded-[2rem] border-emerald-100 bg-[linear-gradient(135deg,rgba(236,253,245,0.92),rgba(240,249,255,0.95))] shadow-none">
+          <CardContent className="grid gap-8 p-6 lg:grid-cols-[1.05fr_0.95fr] lg:p-8">
+            <div className="space-y-5">
+              <div>
+                <div className="text-sm font-semibold uppercase tracking-[0.22em] text-emerald-700">Meet The Team</div>
+                <h2 className="mt-2 text-2xl font-semibold text-slate-900">A student project shaped by research, design, and practical thinking</h2>
+              </div>
+              <p className="max-w-2xl text-sm leading-7 text-slate-600 sm:text-base">
+                Our team worked to understand the real gaps in plastic collection, especially where low-value waste is ignored, and then built a solution around visibility, convenience, and long-term feasibility. The goal was not to propose a temporary campaign, but to design a system that can fit daily life and existing infrastructure.
+              </p>
+              <div className="grid gap-3 sm:grid-cols-3">
+                {[
+                  'Grounded in real waste-system constraints',
+                  'Focused on behavior and usability',
+                  'Planned for scale and sustainability',
+                ].map((item) => (
+                  <div key={item} className="rounded-2xl border border-white/80 bg-white/80 p-4 text-sm font-medium text-slate-700">
+                    {item}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              {members.map((member) => (
+                <Card key={member.name} className="overflow-hidden rounded-[1.75rem] border-white/80 bg-white/80 shadow-none backdrop-blur">
+                  <CardContent className="p-4">
+                    <div className="mx-auto aspect-[4/4.8] w-full max-w-[170px] overflow-hidden rounded-[1.35rem] bg-[linear-gradient(135deg,rgba(16,185,129,0.12),rgba(14,165,233,0.14))]">
+                      <img
+                        src={member.image}
+                        alt={member.alt}
+                        className="h-full w-full object-cover"
+                      />
+                    </div>
+                    <div className="mt-4 text-center">
+                      <div className="text-base font-semibold text-slate-900">{member.name}</div>
+                      <div className="mt-1 text-sm text-slate-500">Team EcoChange Makers</div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <div className="text-sm font-semibold uppercase tracking-[0.22em] text-sky-700">Acknowledgements</div>
+            <h2 className="text-2xl font-semibold tracking-tight text-slate-900">With thanks for guidance and support</h2>
+            <p className="max-w-3xl text-sm leading-7 text-slate-600 sm:text-base">
+              This project also benefited from valuable mentorship and support that helped strengthen the idea and its real-world direction.
+            </p>
+          </div>
+
+          <div className="grid gap-5 lg:grid-cols-2">
+            {acknowledgements.map((person) => (
+              <Card key={person.name} className={`overflow-hidden rounded-[2rem] border-slate-200/80 bg-gradient-to-br ${person.accent} shadow-none`}>
+                <CardContent className="grid gap-5 p-6 sm:grid-cols-[140px_1fr] sm:items-center">
+                  <div className="mx-auto aspect-[4/4.8] w-full max-w-[140px] overflow-hidden rounded-[1.35rem] border border-white/80 bg-white/75">
+                    <img
+                      src={person.image}
+                      alt={person.alt}
+                      className="h-full w-full object-cover"
+                    />
+                  </div>
+                  <div className="space-y-3">
+                    <div className="space-y-1">
+                      <div className="text-xl font-semibold text-slate-900">{person.name}</div>
+                      <div className="text-sm font-medium text-emerald-700">{person.role}</div>
+                      <div className="text-sm leading-6 text-slate-600">{person.org}</div>
+                    </div>
+                    <p className="text-sm leading-7 text-slate-600">{person.note}</p>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+
+        <Card className="rounded-[2rem] border-sky-100 bg-white/90 shadow-none">
+          <CardHeader>
+            <CardTitle className="text-xl">What the team tried to build into the project</CardTitle>
+          </CardHeader>
+          <CardContent className="grid gap-3 md:grid-cols-4">
+            {['Practical thinking', 'System improvement', 'Behavior change', 'Long-term sustainability'].map((v) => (
+              <div key={v} className="rounded-2xl bg-sky-50/70 p-4 text-sm text-slate-700">{v}</div>
+            ))}
+          </CardContent>
+        </Card>
+      </motion.div>
+    </div>
+  );
+}
+
 function TeamPage() {
   const members = [
-    'MD Maruf Ahmed',
-    'Mahedi Mostafa Rifat',
-    'Mayesha Ann-Noor Nishma',
-    'Mir Sajid Hussain',
+    {
+      name: 'MD Maruf Ahmed',
+      image: '/images/maruf.jpg',
+      alt: 'Portrait of MD Maruf Ahmed',
+    },
+    {
+      name: 'Mahedi Mostafa Rifat',
+      image: '/images/mehedi.png',
+      alt: 'Portrait of Mahedi Mostafa Rifat',
+    },
+    {
+      name: 'Mayesha Ann-Noor Nishma',
+      image: '/images/mayesha.png',
+      alt: 'Portrait of Mayesha Ann-Noor Nishma',
+    },
+    {
+      name: 'Mir Sajid Hussain',
+      image: '/images/sajid.png',
+      alt: 'Portrait of Mir Sajid Hussain',
+    },
   ];
 
   return (
@@ -1430,11 +2378,17 @@ function TeamPage() {
         </div>
 
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          {members.map((name) => (
-            <Card key={name} className="rounded-3xl border-emerald-100 shadow-none">
-              <CardContent className="flex min-h-[160px] flex-col justify-end p-6">
-                <div className="mb-4 h-14 w-14 rounded-2xl bg-gradient-to-br from-emerald-500 to-sky-500" />
-                <div className="text-lg font-semibold text-slate-900">{name}</div>
+          {members.map((member) => (
+            <Card key={member.name} className="overflow-hidden rounded-3xl border-emerald-100 shadow-none">
+              <div className="aspect-[4/4.6] overflow-hidden bg-[linear-gradient(135deg,rgba(16,185,129,0.12),rgba(14,165,233,0.12))]">
+                <img
+                  src={member.image}
+                  alt={member.alt}
+                  className="h-full w-full object-cover"
+                />
+              </div>
+              <CardContent className="flex min-h-[110px] flex-col justify-end p-6">
+                <div className="text-lg font-semibold text-slate-900">{member.name}</div>
                 <div className="text-sm text-slate-500">Team EcoChange Makers</div>
               </CardContent>
             </Card>
@@ -1460,9 +2414,10 @@ function GalleryPage() {
   const placeholders = [
     {
       title: 'Booth in front of a school',
-      subtitle: 'Example image placeholder',
-      note: 'Add a concept image showing students passing by and using the booth near a school entrance.',
-      icon: School,
+      subtitle: 'School placement concept',
+      note: 'Concept visual showing the booth near a school entrance where students regularly pass by.',
+      image: '/images/booth on school.png',
+      alt: 'Smart Plastic Drop Booth placed near a school entrance',
     },
     {
       title: 'Booth beside the beach',
@@ -1478,28 +2433,54 @@ function GalleryPage() {
     },
   ];
 
+  const galleryItems = [
+    {
+      title: 'Booth in front of a school',
+      subtitle: 'School placement concept',
+      note: 'Concept visual showing the booth near a school entrance where students regularly pass by.',
+      image: '/images/booth on school.png',
+      alt: 'Smart Plastic Drop Booth placed near a school entrance',
+    },
+    {
+      title: 'Booth beside the beach',
+      subtitle: 'Beach placement concept',
+      note: 'Concept visual showing the booth near the beachside walkway or coastal edge.',
+      image: '/images/booth near beach.png',
+      alt: 'Smart Plastic Drop Booth placed beside the beach',
+    },
+    {
+      title: 'Booth on a busy roadside',
+      subtitle: 'Roadside placement concept',
+      note: 'Concept visual showing the booth on a visible high-footfall roadside location.',
+      image: '/images/booth near busy road.png',
+      alt: 'Smart Plastic Drop Booth placed on a busy roadside',
+    },
+  ];
+
   return (
     <div className="mx-auto w-full max-w-[1800px] overflow-x-hidden px-3 py-10 sm:px-4 lg:px-5 md:py-14">
       <motion.div variants={sectionFade} initial="hidden" animate="show" className="space-y-8">
         <div className="space-y-3">
           <Badge className="rounded-full bg-emerald-100 text-emerald-800 hover:bg-emerald-100">Booth Gallery</Badge>
-          <h1 className="text-4xl font-semibold tracking-tight text-slate-900">Visual concept placeholders</h1>
+          <h1 className="text-4xl font-semibold tracking-tight text-slate-900">Booth gallery concepts</h1>
           <p className="max-w-4xl text-base leading-7 text-slate-600">
-            This page reserves space for three example visuals showing how the Smart Plastic Drop Booth could appear in different locations.
+            This page shows three concept visuals of how the Smart Plastic Drop Booth could appear in different locations.
           </p>
         </div>
 
         <div className="grid gap-6 lg:grid-cols-3">
-          {placeholders.map((item) => (
+          {galleryItems.map((item) => (
             <Card key={item.title} className="overflow-hidden rounded-[2rem] border-emerald-100 shadow-none">
-              <div className="flex aspect-[4/3] items-center justify-center bg-[linear-gradient(135deg,rgba(16,185,129,0.12),rgba(14,165,233,0.12))]">
-                <div className="flex flex-col items-center gap-3 text-center text-slate-500">
-                  <item.icon className="h-10 w-10 text-emerald-600" />
-                  <div className="flex items-center gap-2 text-sm"><Camera className="h-4 w-4" /> {item.subtitle}</div>
-                </div>
+              <div className="aspect-[4/3] overflow-hidden bg-[linear-gradient(135deg,rgba(16,185,129,0.12),rgba(14,165,233,0.12))]">
+                <img
+                  src={item.image}
+                  alt={item.alt}
+                  className="h-full w-full object-cover"
+                />
               </div>
               <CardContent className="p-6">
                 <h3 className="text-xl font-semibold text-slate-900">{item.title}</h3>
+                <div className="mt-2 flex items-center gap-2 text-sm text-slate-500"><Camera className="h-4 w-4" /> {item.subtitle}</div>
                 <p className="mt-2 text-sm leading-6 text-slate-600">{item.note}</p>
               </CardContent>
             </Card>
@@ -1581,11 +2562,11 @@ export default function ProjectWebsite() {
   const page = useMemo(() => {
     switch (current) {
       case 'home':
-        return <HomePage setCurrent={setCurrent} />;
+        return <HomeLandingPage setCurrent={setCurrent} />;
       case 'problem':
-        return <ProblemPage />;
+        return <ProblemShowcasePage />;
       case 'solution':
-        return <SolutionPage />;
+        return <SolutionShowcasePage />;
       case 'plan':
         return <PlanPage />;
       case 'outcome':
@@ -1593,13 +2574,13 @@ export default function ProjectWebsite() {
       case 'finance':
         return <FinancePage />;
       case 'team':
-        return <TeamPage />;
+        return <TeamShowcasePage />;
       case 'gallery':
         return <GalleryPage />;
       case 'faq':
         return <FAQPage />;
       default:
-        return <HomePage setCurrent={setCurrent} />;
+        return <HomeLandingPage setCurrent={setCurrent} />;
     }
   }, [current]);
 
@@ -1607,20 +2588,24 @@ export default function ProjectWebsite() {
     <div className="min-h-screen overflow-x-hidden bg-[linear-gradient(to_bottom,white,rgba(236,253,245,0.35),white)] text-slate-900">
       <Nav current={current} setCurrent={setCurrent} />
       <main className="pt-[76px] md:pt-0">{page}</main>
-      <Separator className="bg-transparent" />
-      <section className="mx-auto w-full max-w-[1800px] px-3 py-6 sm:px-4 lg:px-5">
-        <div className="rounded-[2rem] border border-emerald-100 bg-white p-6 shadow-sm">
-          <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
-            <div>
-              <div className="text-sm font-medium text-emerald-700">Project highlights</div>
-              <div className="mt-1 text-lg font-semibold text-slate-900">Practical. Visible. Scalable. Sponsor-aware.</div>
+      {current !== 'gallery' && (
+        <>
+          <Separator className="bg-transparent" />
+          <section className="mx-auto w-full max-w-[1800px] px-3 py-6 sm:px-4 lg:px-5">
+            <div className="rounded-[2rem] border border-emerald-100 bg-white p-6 shadow-sm">
+              <div className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
+                <div>
+                  <div className="text-sm font-medium text-emerald-700">Project highlights</div>
+                  <div className="mt-1 text-lg font-semibold text-slate-900">Practical. Visible. Scalable. Sponsor-aware.</div>
+                </div>
+                <Button onClick={() => setCurrent('gallery')} className="rounded-full bg-slate-900 px-5 hover:bg-slate-800">
+                  View booth placeholders <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </div>
             </div>
-            <Button onClick={() => setCurrent('gallery')} className="rounded-full bg-slate-900 px-5 hover:bg-slate-800">
-              View booth placeholders <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-      </section>
+          </section>
+        </>
+      )}
       <Footer setCurrent={setCurrent} />
     </div>
   );
