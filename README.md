@@ -28,17 +28,6 @@ npm run build
 npm run preview
 ```
 
-## Financial Overview
-
-| Phase | Booths | Timeline | Monthly OPEX | Monthly Sponsor Income |
-|-------|--------|----------|--------------|------------------------|
-| Pilot | 4 | Months 1-6 | Tk 8,500 | Tk 6,000 |
-| Scale 1 | 10 | Months 7-15 | Tk 13,000 | Tk 15,000 |
-| Scale 2 | 30 | Months 16-24 | Tk 27,000 | Tk 30,000 |
-
-**Break-even:** Month 23  
-**Final 24-month net:** Tk 35,704
-
 ## Collaboration with BRAC UDP
 
 This project is developed in partnership with **BRAC Urban Development Programme**, which works on making cities livable for all through sustainable waste management solutions.
