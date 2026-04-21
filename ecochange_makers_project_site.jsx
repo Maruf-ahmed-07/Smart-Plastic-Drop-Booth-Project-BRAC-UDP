@@ -721,6 +721,13 @@ function FinancePage() {
 
   const currency = (n) => `Tk ${Number(n).toLocaleString()}`;
 
+  const mobileAssumptions = assumptions;
+  const mobileInitialCostBreakdown = initialCostBreakdown;
+  const mobileExpansionCostBreakdown = expansionCostBreakdown;
+  const mobileOpexBreakdown = opexBreakdown;
+  const mobileSponsorBreakdown = sponsorBreakdown;
+  const mobilePlasticFormulaRows = plasticFormulaRows;
+
   return (
     <div className="mx-auto w-full max-w-[1800px] overflow-x-hidden px-3 py-10 sm:px-4 lg:px-5 md:py-14">
       <motion.div variants={sectionFade} initial="hidden" animate="show" className="space-y-8">
@@ -796,8 +803,18 @@ function FinancePage() {
               <CardDescription>Every core input used in the model</CardDescription>
             </CardHeader>
             <CardContent className="overflow-hidden">
+              <div className="grid gap-3 md:hidden">
+                {mobileAssumptions.map((row) => (
+                  <div key={`${row.category}-${row.item}`} className="rounded-2xl border border-emerald-100 bg-emerald-50/40 p-4 shadow-sm">
+                    <div className="text-xs font-medium uppercase tracking-wide text-emerald-700">{row.category}</div>
+                    <div className="mt-1 text-sm font-semibold text-slate-900">{row.item}</div>
+                    <div className="mt-2 text-sm text-emerald-700">{row.value}</div>
+                    <div className="mt-2 text-xs leading-5 text-slate-600">{row.why}</div>
+                  </div>
+                ))}
+              </div>
               <div className="max-w-full overflow-x-auto overscroll-x-contain rounded-2xl border border-emerald-100" style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-x pan-y' }}>
-                <table className="min-w-[760px] md:min-w-full table-auto text-left text-xs sm:text-sm">
+                <table className="hidden min-w-[760px] md:table md:min-w-full table-auto text-left text-xs sm:text-sm">
                   <thead>
                     <tr className="border-b border-emerald-100 text-slate-500">
                       <th className="px-2 py-2 font-medium whitespace-nowrap">Category</th>
@@ -853,8 +870,24 @@ function FinancePage() {
             <CardContent className="space-y-6 p-3 sm:p-6">
               <div>
                 <div className="mb-3 text-sm font-medium text-slate-500">Initial setup</div>
+                <div className="grid gap-3 md:hidden">
+                  {mobileInitialCostBreakdown.map((row) => (
+                    <div key={row.item} className="rounded-2xl border border-emerald-100 bg-white p-4 shadow-sm">
+                      <div className="text-sm font-semibold text-slate-900">{row.item}</div>
+                      <div className="mt-2 grid grid-cols-2 gap-2 text-xs text-slate-600">
+                        <div><span className="font-medium text-slate-500">Unit:</span> {row.unit}</div>
+                        <div><span className="font-medium text-slate-500">Qty:</span> {row.qty}</div>
+                        <div><span className="font-medium text-slate-500">Total:</span> {currency(row.total)}</div>
+                        <div className="text-emerald-700"><span className="font-medium text-slate-500">Why:</span> {row.note}</div>
+                      </div>
+                    </div>
+                  ))}
+                  <div className="rounded-2xl border border-emerald-100 bg-emerald-50/60 p-4 text-sm font-semibold text-slate-900">
+                    Initial setup total: <span className="text-emerald-700">{currency(88000)}</span>
+                  </div>
+                </div>
                 <div className="overflow-x-auto overscroll-x-contain">
-                  <table className="min-w-[760px] md:min-w-full table-auto text-left text-sm">
+                  <table className="hidden min-w-[760px] md:table md:min-w-full table-auto text-left text-sm">
                     <thead>
                       <tr className="border-b border-emerald-100 text-slate-500">
                         <th className="px-2 py-2 font-medium whitespace-nowrap">Item</th>
@@ -886,8 +919,21 @@ function FinancePage() {
 
               <div>
                 <div className="mb-3 text-sm font-medium text-slate-500">Expansion stages</div>
+                <div className="grid gap-3 md:hidden">
+                  {mobileExpansionCostBreakdown.map((row) => (
+                    <div key={row.stage} className="rounded-2xl border border-sky-100 bg-white p-4 shadow-sm">
+                      <div className="text-sm font-semibold text-slate-900">{row.stage}</div>
+                      <div className="mt-2 grid grid-cols-2 gap-2 text-xs text-slate-600">
+                        <div><span className="font-medium text-slate-500">Gross:</span> {currency(row.gross)}</div>
+                        <div><span className="font-medium text-slate-500">Support:</span> {currency(row.support)}</div>
+                        <div><span className="font-medium text-slate-500">Net:</span> {currency(row.net)}</div>
+                        <div className="text-slate-600"><span className="font-medium text-slate-500">Note:</span> {row.note}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
                 <div className="overflow-x-auto overscroll-x-contain">
-                  <table className="min-w-[860px] md:min-w-full table-auto text-left text-sm">
+                  <table className="hidden min-w-[860px] md:table md:min-w-full table-auto text-left text-sm">
                     <thead>
                       <tr className="border-b border-sky-100 text-slate-500">
                         <th className="px-2 py-2 font-medium whitespace-nowrap">Stage</th>
@@ -922,8 +968,23 @@ function FinancePage() {
             <CardContent className="space-y-6 p-3 sm:p-6">
               <div>
                 <div className="mb-3 flex items-center gap-2 text-sm font-medium text-slate-500"><Truck className="h-4 w-4" /> Monthly operating cost</div>
+                <div className="grid gap-3 md:hidden">
+                  {mobileOpexBreakdown.map((row) => (
+                    <div key={row.stage} className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+                      <div className="text-sm font-semibold text-slate-900">{row.stage}</div>
+                      <div className="mt-2 grid grid-cols-2 gap-2 text-xs text-slate-600">
+                        <div><span className="font-medium text-slate-500">Operator:</span> {currency(row.operator)}</div>
+                        <div><span className="font-medium text-slate-500">Transport:</span> {currency(row.transport)}</div>
+                        <div><span className="font-medium text-slate-500">Maintenance:</span> {currency(row.maintenance)}</div>
+                        <div><span className="font-medium text-slate-500">Misc:</span> {currency(row.misc)}</div>
+                        <div><span className="font-medium text-slate-500">Total:</span> {currency(row.total)}</div>
+                        <div><span className="font-medium text-slate-500">Per booth:</span> {currency(row.perBooth)}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
                 <div className="overflow-x-auto overscroll-x-contain">
-                  <table className="min-w-[980px] md:min-w-full table-auto text-left text-sm">
+                  <table className="hidden min-w-[980px] md:table md:min-w-full table-auto text-left text-sm">
                     <thead>
                       <tr className="border-b border-slate-200 text-slate-500">
                         <th className="px-2 py-2 font-medium whitespace-nowrap">Stage</th>
@@ -954,8 +1015,21 @@ function FinancePage() {
 
               <div>
                 <div className="mb-3 flex items-center gap-2 text-sm font-medium text-slate-500"><Landmark className="h-4 w-4" /> Sponsor income</div>
+                <div className="grid gap-3 md:hidden">
+                  {mobileSponsorBreakdown.map((row) => (
+                    <div key={row.stage} className="rounded-2xl border border-sky-100 bg-white p-4 shadow-sm">
+                      <div className="text-sm font-semibold text-slate-900">{row.stage}</div>
+                      <div className="mt-2 grid grid-cols-2 gap-2 text-xs text-slate-600">
+                        <div><span className="font-medium text-slate-500">Booths:</span> {row.booths}</div>
+                        <div><span className="font-medium text-slate-500">Monthly income:</span> {currency(row.total)}</div>
+                        <div><span className="font-medium text-slate-500">Per booth:</span> {currency(row.perBooth)}</div>
+                        <div><span className="font-medium text-slate-500">Type:</span> {row.type}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
                 <div className="overflow-x-auto overscroll-x-contain">
-                  <table className="min-w-[900px] md:min-w-full table-auto text-left text-sm">
+                  <table className="hidden min-w-[900px] md:table md:min-w-full table-auto text-left text-sm">
                     <thead>
                       <tr className="border-b border-slate-200 text-slate-500">
                         <th className="px-2 py-2 font-medium whitespace-nowrap">Stage</th>
@@ -982,8 +1056,22 @@ function FinancePage() {
 
               <div>
                 <div className="mb-3 flex items-center gap-2 text-sm font-medium text-slate-500"><Recycle className="h-4 w-4" /> Plastic revenue formula</div>
+                <div className="grid gap-3 md:hidden">
+                  {mobilePlasticFormulaRows.map((row) => (
+                    <div key={row.stage} className="rounded-2xl border border-emerald-100 bg-white p-4 shadow-sm">
+                      <div className="text-sm font-semibold text-slate-900">{row.stage}</div>
+                      <div className="mt-2 grid grid-cols-2 gap-2 text-xs text-slate-600">
+                        <div><span className="font-medium text-slate-500">Booths:</span> {row.booths}</div>
+                        <div><span className="font-medium text-slate-500">Kg/day:</span> {row.rate}</div>
+                        <div><span className="font-medium text-slate-500">Monthly kg:</span> {row.monthlyKg}</div>
+                        <div><span className="font-medium text-slate-500">Price/kg:</span> Tk {row.price}</div>
+                        <div className="col-span-2"><span className="font-medium text-slate-500">Revenue:</span> {currency(row.revenue)}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
                 <div className="overflow-x-auto overscroll-x-contain">
-                  <table className="min-w-[860px] md:min-w-full table-auto text-left text-sm">
+                  <table className="hidden min-w-[860px] md:table md:min-w-full table-auto text-left text-sm">
                     <thead>
                       <tr className="border-b border-slate-200 text-slate-500">
                         <th className="px-2 py-2 font-medium whitespace-nowrap">Stage</th>
@@ -1021,7 +1109,7 @@ function FinancePage() {
             </CardHeader>
             <CardContent className="overflow-hidden p-3 sm:p-6">
               <p className="mb-2 text-xs text-slate-500 md:hidden">Swipe left/right to view all columns</p>
-              <div className="max-h-[520px] max-w-full overflow-x-auto overflow-y-auto overscroll-contain rounded-2xl border border-emerald-100" style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-x pan-y' }}>
+              <div className="max-h-[520px] max-w-full overflow-x-auto overflow-y-auto overscroll-x-contain rounded-2xl border border-emerald-100" style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-x pan-y' }}>
                 <table className="min-w-[980px] 2xl:min-w-full table-auto text-left text-[12px] sm:text-[13px]">
                   <thead className="sticky top-0 bg-white">
                     <tr className="border-b border-emerald-100 text-slate-500">
@@ -1061,7 +1149,7 @@ function FinancePage() {
             </CardHeader>
             <CardContent className="overflow-hidden p-3 sm:p-6">
               <p className="mb-2 text-xs text-slate-500 md:hidden">Swipe left/right to view all columns</p>
-              <div className="max-w-full overflow-x-auto overscroll-x-contain rounded-2xl border border-emerald-100" style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-x pan-y' }}>
+              <div className="max-w-full overflow-x-auto overflow-y-hidden overscroll-x-contain rounded-2xl border border-emerald-100" style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-x pan-y' }}>
                 <table className="min-w-[920px] xl:min-w-full table-auto text-left text-sm">
                   <thead>
                     <tr className="border-b border-emerald-100 text-slate-500">
@@ -1111,7 +1199,7 @@ function FinancePage() {
                 <CardTitle className="text-xl">Inflow vs cost by month</CardTitle>
                 <CardDescription>Shows how sponsor income and plastic revenue compare against monthly opex and capex</CardDescription>
               </CardHeader>
-                <CardContent className="h-[240px] sm:h-[280px] p-2 sm:p-4">
+              <CardContent className="h-[240px] sm:h-[280px] p-2 sm:p-4">
                 <div className="h-full w-full">
                     <ResponsiveContainer width="100%" height="100%">
                       <AreaChart data={chartData}>
