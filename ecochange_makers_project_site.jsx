@@ -348,7 +348,7 @@ function PlanPage() {
   );
 
   return (
-    <div className="mx-auto w-full max-w-[1800px] overflow-x-hidden px-3 py-10 sm:px-4 lg:px-5 md:py-14">
+    <div className="mx-auto w-full max-w-[1800px] px-3 py-10 sm:px-4 lg:px-5 md:py-14">
       <motion.div variants={sectionFade} initial="hidden" animate="show" className="space-y-8">
         <div className="space-y-3">
           <Badge className="rounded-full bg-emerald-100 text-emerald-800 hover:bg-emerald-100">Implementation</Badge>
@@ -732,19 +732,19 @@ function FinancePage() {
           </p>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
           {summaryCards.map((card) => (
             <Card key={card.label} className="rounded-3xl border-emerald-100 shadow-none">
-              <CardContent className="p-6">
+              <CardContent className="p-4 sm:p-6">
                 <card.icon className="mb-4 h-8 w-8 text-emerald-600" />
-                <div className="text-sm text-slate-500">{card.label}</div>
-                <div className="mt-1 text-2xl font-semibold text-slate-900">{card.value}</div>
+                <div className="text-xs sm:text-sm text-slate-500">{card.label}</div>
+                <div className="mt-1 text-xl sm:text-2xl font-semibold text-slate-900">{card.value}</div>
               </CardContent>
             </Card>
           ))}
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+        <div className="grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
           <Card className="rounded-[2rem] border-emerald-100 shadow-none">
             <CardHeader>
               <CardTitle className="text-xl">How the model was built</CardTitle>
@@ -771,7 +771,7 @@ function FinancePage() {
               <CardTitle className="text-xl">Visual cashflow trend</CardTitle>
               <CardDescription>Monthly net cashflow and cumulative position over 24 months</CardDescription>
             </CardHeader>
-            <CardContent className="h-[340px] p-2 sm:p-4">
+            <CardContent className="h-[280px] sm:h-[340px] p-2 sm:p-4">
               <div className="h-full w-full">
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={chartData}>
@@ -789,15 +789,14 @@ function FinancePage() {
           </Card>
         </div>
 
-        <div className="grid gap-6 xl:grid-cols-2">
+        <div className="grid gap-4 xl:grid-cols-2">
           <Card className="rounded-[2rem] border-emerald-100 shadow-none">
             <CardHeader>
               <CardTitle className="text-xl">Assumptions table</CardTitle>
               <CardDescription>Every core input used in the model</CardDescription>
             </CardHeader>
             <CardContent className="overflow-hidden">
-              <p className="mb-2 text-xs text-slate-500 md:hidden">Swipe left/right to view full table</p>
-              <div className="max-w-full overflow-x-auto overscroll-x-contain" style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-x pan-y' }}>
+              <div className="max-w-full overflow-x-auto overscroll-x-contain rounded-2xl border border-emerald-100" style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-x pan-y' }}>
                 <table className="min-w-[760px] md:min-w-full table-auto text-left text-xs sm:text-sm">
                   <thead>
                     <tr className="border-b border-emerald-100 text-slate-500">
@@ -827,7 +826,7 @@ function FinancePage() {
               <CardTitle className="text-xl">Revenue mix by month</CardTitle>
               <CardDescription>How sponsor revenue and plastic revenue combine over time</CardDescription>
             </CardHeader>
-            <CardContent className="h-[400px] p-2 sm:p-4">
+            <CardContent className="h-[280px] sm:h-[400px] p-2 sm:p-4">
               <div className="h-full w-full">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={chartData}>
@@ -845,13 +844,13 @@ function FinancePage() {
           </Card>
         </div>
 
-        <div className="grid gap-6 xl:grid-cols-2">
+        <div className="grid gap-4 xl:grid-cols-2">
           <Card className="rounded-[2rem] border-emerald-100 shadow-none">
             <CardHeader>
               <CardTitle className="text-xl">Initial and expansion cost breakdown</CardTitle>
               <CardDescription>Capital cost is separated so users can see setup burden clearly</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6">
+            <CardContent className="space-y-6 p-3 sm:p-6">
               <div>
                 <div className="mb-3 text-sm font-medium text-slate-500">Initial setup</div>
                 <div className="overflow-x-auto overscroll-x-contain">
@@ -920,7 +919,7 @@ function FinancePage() {
               <CardTitle className="text-xl">Cost and income breakdown by stage</CardTitle>
               <CardDescription>Simple tables users can read without financial background</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6">
+            <CardContent className="space-y-6 p-3 sm:p-6">
               <div>
                 <div className="mb-3 flex items-center gap-2 text-sm font-medium text-slate-500"><Truck className="h-4 w-4" /> Monthly operating cost</div>
                 <div className="overflow-x-auto overscroll-x-contain">
@@ -1020,10 +1019,10 @@ function FinancePage() {
               <CardTitle className="text-xl">Month-by-month 24-month cashflow</CardTitle>
               <CardDescription>Full breakdown including setup, scale-up, recurring income, and cumulative position</CardDescription>
             </CardHeader>
-            <CardContent className="overflow-hidden">
+            <CardContent className="overflow-hidden p-3 sm:p-6">
               <p className="mb-2 text-xs text-slate-500 md:hidden">Swipe left/right to view all columns</p>
               <div className="max-h-[520px] max-w-full overflow-x-auto overflow-y-auto overscroll-contain rounded-2xl border border-emerald-100" style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-x pan-y' }}>
-                <table className="min-w-[980px] 2xl:min-w-full table-auto text-left text-[13px]">
+                <table className="min-w-[980px] 2xl:min-w-full table-auto text-left text-[12px] sm:text-[13px]">
                   <thead className="sticky top-0 bg-white">
                     <tr className="border-b border-emerald-100 text-slate-500">
                       {['Month', 'Phase', 'Booths', 'Kg/day/booth', 'Monthly kg', 'Plastic revenue', 'Sponsor recurring', 'Sponsor support', 'Total inflow', 'Opex', 'Capex', 'Net', 'Cumulative'].map((h) => (
@@ -1034,8 +1033,8 @@ function FinancePage() {
                   <tbody>
                     {monthlyRows.map((row) => (
                       <tr key={row.month} className={`border-b border-slate-100 ${row.month === 23 ? 'bg-emerald-50/70' : row.phase === 'Scale 2' ? 'bg-sky-50/25' : row.phase === 'Scale 1' ? 'bg-violet-50/25' : ''}`}>
-                        <td className="sticky left-0 z-10 bg-white px-2 py-2 font-medium text-slate-900">{row.month}</td>
-                        <td className="sticky left-[48px] z-10 bg-white px-2 py-2 text-slate-500">{row.phase}</td>
+                        <td className="sticky left-0 z-10 bg-white px-2 py-2 font-medium text-slate-900 shadow-[1px_0_0_0_rgba(226,232,240,1)]">{row.month}</td>
+                        <td className="sticky left-[48px] z-10 bg-white px-2 py-2 text-slate-500 shadow-[1px_0_0_0_rgba(226,232,240,1)]">{row.phase}</td>
                         <td className="px-2 py-2">{row.booths}</td>
                         <td className="px-2 py-2">{row.kgDay}</td>
                         <td className="px-2 py-2">{row.plasticKg.toLocaleString()}</td>
@@ -1060,7 +1059,7 @@ function FinancePage() {
               <CardTitle className="text-xl">Phase summary</CardTitle>
               <CardDescription>Easy summary view for sponsors and reviewers</CardDescription>
             </CardHeader>
-            <CardContent className="overflow-hidden">
+            <CardContent className="overflow-hidden p-3 sm:p-6">
               <p className="mb-2 text-xs text-slate-500 md:hidden">Swipe left/right to view all columns</p>
               <div className="max-w-full overflow-x-auto overscroll-x-contain rounded-2xl border border-emerald-100" style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-x pan-y' }}>
                 <table className="min-w-[920px] xl:min-w-full table-auto text-left text-sm">
@@ -1112,7 +1111,7 @@ function FinancePage() {
                 <CardTitle className="text-xl">Inflow vs cost by month</CardTitle>
                 <CardDescription>Shows how sponsor income and plastic revenue compare against monthly opex and capex</CardDescription>
               </CardHeader>
-              <CardContent className="h-[280px] p-2 sm:p-4">
+                <CardContent className="h-[240px] sm:h-[280px] p-2 sm:p-4">
                 <div className="h-full w-full">
                     <ResponsiveContainer width="100%" height="100%">
                       <AreaChart data={chartData}>
