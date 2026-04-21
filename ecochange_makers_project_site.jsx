@@ -1109,35 +1109,69 @@ function FinancePage() {
             </CardHeader>
             <CardContent className="overflow-hidden p-3 sm:p-6">
               <p className="mb-2 text-xs text-slate-500 md:hidden">Swipe left/right to view all columns</p>
-              <div className="max-h-[520px] max-w-full overflow-x-auto overflow-y-auto overscroll-x-contain rounded-2xl border border-emerald-100" style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-x pan-y' }}>
-                <table className="min-w-[980px] 2xl:min-w-full table-auto text-left text-[12px] sm:text-[13px]">
-                  <thead className="sticky top-0 bg-white">
-                    <tr className="border-b border-emerald-100 text-slate-500">
-                      {['Month', 'Phase', 'Booths', 'Kg/day/booth', 'Monthly kg', 'Plastic revenue', 'Sponsor recurring', 'Sponsor support', 'Total inflow', 'Opex', 'Capex', 'Net', 'Cumulative'].map((h) => (
-                        <th key={h} className="px-3 py-3 font-medium">{h}</th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {monthlyRows.map((row) => (
-                      <tr key={row.month} className={`border-b border-slate-100 ${row.month === 23 ? 'bg-emerald-50/70' : row.phase === 'Scale 2' ? 'bg-sky-50/25' : row.phase === 'Scale 1' ? 'bg-violet-50/25' : ''}`}>
-                        <td className="px-2 py-2 font-medium text-slate-900 md:sticky md:left-0 md:z-10 md:bg-white md:shadow-[1px_0_0_0_rgba(226,232,240,1)]">{row.month}</td>
-                        <td className="px-2 py-2 text-slate-500 md:sticky md:left-[48px] md:z-10 md:bg-white md:shadow-[1px_0_0_0_rgba(226,232,240,1)]">{row.phase}</td>
-                        <td className="px-2 py-2">{row.booths}</td>
-                        <td className="px-2 py-2">{row.kgDay}</td>
-                        <td className="px-2 py-2">{row.plasticKg.toLocaleString()}</td>
-                        <td className="px-2 py-2">{currency(row.plasticRevenue)}</td>
-                        <td className="px-2 py-2">{currency(row.sponsorRecurring)}</td>
-                        <td className="px-2 py-2">{currency(row.sponsorSupport)}</td>
-                        <td className="px-2 py-2 font-medium text-slate-900">{currency(row.inflow)}</td>
-                        <td className="px-2 py-2">{currency(row.opex)}</td>
-                        <td className="px-2 py-2">{currency(row.capex)}</td>
-                        <td className={`px-2 py-2 font-medium ${row.net >= 0 ? 'text-emerald-700' : 'text-rose-600'}`}>{currency(row.net)}</td>
-                        <td className={`px-2 py-2 font-medium ${row.cumulative >= 0 ? 'text-emerald-700' : 'text-rose-600'}`}>{currency(row.cumulative)}</td>
+              <div className="md:hidden">
+                <div className="overflow-x-auto overflow-y-auto rounded-2xl border border-emerald-100" style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-x pan-y' }}>
+                  <table className="w-max min-w-[1180px] table-auto text-left text-[11px]">
+                    <thead className="sticky top-0 bg-white">
+                      <tr className="border-b border-emerald-100 text-slate-500">
+                        {['Month', 'Phase', 'Booths', 'Kg/day/booth', 'Monthly kg', 'Plastic revenue', 'Sponsor recurring', 'Sponsor support', 'Total inflow', 'Opex', 'Capex', 'Net', 'Cumulative'].map((h) => (
+                          <th key={h} className="px-2 py-3 font-medium whitespace-nowrap">{h}</th>
+                        ))}
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {monthlyRows.map((row) => (
+                        <tr key={row.month} className={`border-b border-slate-100 ${row.month === 23 ? 'bg-emerald-50/70' : row.phase === 'Scale 2' ? 'bg-sky-50/25' : row.phase === 'Scale 1' ? 'bg-violet-50/25' : ''}`}>
+                          <td className="px-2 py-2 font-medium text-slate-900 whitespace-nowrap">{row.month}</td>
+                          <td className="px-2 py-2 text-slate-500 whitespace-nowrap">{row.phase}</td>
+                          <td className="px-2 py-2 whitespace-nowrap">{row.booths}</td>
+                          <td className="px-2 py-2 whitespace-nowrap">{row.kgDay}</td>
+                          <td className="px-2 py-2 whitespace-nowrap">{row.plasticKg.toLocaleString()}</td>
+                          <td className="px-2 py-2 whitespace-nowrap">{currency(row.plasticRevenue)}</td>
+                          <td className="px-2 py-2 whitespace-nowrap">{currency(row.sponsorRecurring)}</td>
+                          <td className="px-2 py-2 whitespace-nowrap">{currency(row.sponsorSupport)}</td>
+                          <td className="px-2 py-2 font-medium text-slate-900 whitespace-nowrap">{currency(row.inflow)}</td>
+                          <td className="px-2 py-2 whitespace-nowrap">{currency(row.opex)}</td>
+                          <td className="px-2 py-2 whitespace-nowrap">{currency(row.capex)}</td>
+                          <td className={`px-2 py-2 font-medium whitespace-nowrap ${row.net >= 0 ? 'text-emerald-700' : 'text-rose-600'}`}>{currency(row.net)}</td>
+                          <td className={`px-2 py-2 font-medium whitespace-nowrap ${row.cumulative >= 0 ? 'text-emerald-700' : 'text-rose-600'}`}>{currency(row.cumulative)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              <div className="hidden md:block">
+                <div className="max-h-[520px] max-w-full overflow-x-auto overflow-y-auto overscroll-x-contain rounded-2xl border border-emerald-100" style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-x pan-y' }}>
+                  <table className="min-w-[980px] 2xl:min-w-full table-auto text-left text-[12px] sm:text-[13px]">
+                    <thead className="sticky top-0 bg-white">
+                      <tr className="border-b border-emerald-100 text-slate-500">
+                        {['Month', 'Phase', 'Booths', 'Kg/day/booth', 'Monthly kg', 'Plastic revenue', 'Sponsor recurring', 'Sponsor support', 'Total inflow', 'Opex', 'Capex', 'Net', 'Cumulative'].map((h) => (
+                          <th key={h} className="px-3 py-3 font-medium">{h}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {monthlyRows.map((row) => (
+                        <tr key={row.month} className={`border-b border-slate-100 ${row.month === 23 ? 'bg-emerald-50/70' : row.phase === 'Scale 2' ? 'bg-sky-50/25' : row.phase === 'Scale 1' ? 'bg-violet-50/25' : ''}`}>
+                          <td className="px-2 py-2 font-medium text-slate-900 md:sticky md:left-0 md:z-10 md:bg-white md:shadow-[1px_0_0_0_rgba(226,232,240,1)]">{row.month}</td>
+                          <td className="px-2 py-2 text-slate-500 md:sticky md:left-[48px] md:z-10 md:bg-white md:shadow-[1px_0_0_0_rgba(226,232,240,1)]">{row.phase}</td>
+                          <td className="px-2 py-2">{row.booths}</td>
+                          <td className="px-2 py-2">{row.kgDay}</td>
+                          <td className="px-2 py-2">{row.plasticKg.toLocaleString()}</td>
+                          <td className="px-2 py-2">{currency(row.plasticRevenue)}</td>
+                          <td className="px-2 py-2">{currency(row.sponsorRecurring)}</td>
+                          <td className="px-2 py-2">{currency(row.sponsorSupport)}</td>
+                          <td className="px-2 py-2 font-medium text-slate-900">{currency(row.inflow)}</td>
+                          <td className="px-2 py-2">{currency(row.opex)}</td>
+                          <td className="px-2 py-2">{currency(row.capex)}</td>
+                          <td className={`px-2 py-2 font-medium ${row.net >= 0 ? 'text-emerald-700' : 'text-rose-600'}`}>{currency(row.net)}</td>
+                          <td className={`px-2 py-2 font-medium ${row.cumulative >= 0 ? 'text-emerald-700' : 'text-rose-600'}`}>{currency(row.cumulative)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -1149,46 +1183,91 @@ function FinancePage() {
             </CardHeader>
             <CardContent className="overflow-hidden p-3 sm:p-6">
               <p className="mb-2 text-xs text-slate-500 md:hidden">Swipe left/right to view all columns</p>
-              <div className="max-w-full overflow-x-auto overflow-y-hidden overscroll-x-contain rounded-2xl border border-emerald-100" style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-x pan-y' }}>
-                <table className="min-w-[1020px] xl:min-w-full table-auto text-left text-sm">
-                  <thead>
-                    <tr className="border-b border-emerald-100 text-slate-500">
-                      <th className="px-2 py-2 font-medium whitespace-nowrap">Phase</th>
-                      <th className="px-2 py-2 font-medium whitespace-nowrap">Period</th>
-                      <th className="px-2 py-2 font-medium whitespace-nowrap">Booths</th>
-                      <th className="px-2 py-2 font-medium whitespace-nowrap">Plastic revenue</th>
-                      <th className="px-2 py-2 font-medium whitespace-nowrap">Sponsor recurring</th>
-                      <th className="px-2 py-2 font-medium whitespace-nowrap">Sponsor support</th>
-                      <th className="px-2 py-2 font-medium whitespace-nowrap">Opex</th>
-                      <th className="px-2 py-2 font-medium whitespace-nowrap">Capex</th>
-                      <th className="px-2 py-2 font-medium whitespace-nowrap">Net</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {phaseSummary.map((row) => (
-                      <tr key={row.phase} className="border-b border-slate-100">
-                        <td className="px-2 py-2 font-medium text-slate-900">{row.phase}</td>
-                        <td className="px-2 py-2">{row.period}</td>
-                        <td className="px-2 py-2">{row.booths}</td>
-                        <td className="px-2 py-2">{currency(row.plasticRevenue)}</td>
-                        <td className="px-2 py-2">{currency(row.sponsorRecurring)}</td>
-                        <td className="px-2 py-2">{currency(row.sponsorSupport)}</td>
-                        <td className="px-2 py-2">{currency(row.opex)}</td>
-                        <td className="px-2 py-2">{currency(row.capex)}</td>
-                        <td className={`px-2 py-2 font-medium ${row.net >= 0 ? 'text-emerald-700' : 'text-rose-600'}`}>{currency(row.net)}</td>
+              <div className="md:hidden">
+                <div className="overflow-x-auto overflow-y-hidden rounded-2xl border border-emerald-100" style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-x pan-y' }}>
+                  <table className="w-max min-w-[1020px] table-auto text-left text-xs">
+                    <thead>
+                      <tr className="border-b border-emerald-100 text-slate-500">
+                        <th className="px-2 py-2 font-medium whitespace-nowrap">Phase</th>
+                        <th className="px-2 py-2 font-medium whitespace-nowrap">Period</th>
+                        <th className="px-2 py-2 font-medium whitespace-nowrap">Booths</th>
+                        <th className="px-2 py-2 font-medium whitespace-nowrap">Plastic revenue</th>
+                        <th className="px-2 py-2 font-medium whitespace-nowrap">Sponsor recurring</th>
+                        <th className="px-2 py-2 font-medium whitespace-nowrap">Sponsor support</th>
+                        <th className="px-2 py-2 font-medium whitespace-nowrap">Opex</th>
+                        <th className="px-2 py-2 font-medium whitespace-nowrap">Capex</th>
+                        <th className="px-2 py-2 font-medium whitespace-nowrap">Net</th>
                       </tr>
-                    ))}
-                    <tr className="bg-emerald-50/70 font-semibold text-slate-900">
-                      <td className="px-3 py-3" colSpan={3}>Total over 24 months</td>
-                      <td className="px-2 py-2">{currency(385704)}</td>
-                      <td className="px-2 py-2">{currency(441000)}</td>
-                      <td className="px-2 py-2">{currency(160000)}</td>
-                      <td className="px-2 py-2">{currency(411000)}</td>
-                      <td className="px-2 py-2">{currency(540000)}</td>
-                      <td className="px-2 py-2 text-emerald-700">{currency(35704)}</td>
-                    </tr>
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {phaseSummary.map((row) => (
+                        <tr key={row.phase} className="border-b border-slate-100">
+                          <td className="px-2 py-2 font-medium text-slate-900 whitespace-nowrap">{row.phase}</td>
+                          <td className="px-2 py-2 whitespace-nowrap">{row.period}</td>
+                          <td className="px-2 py-2 whitespace-nowrap">{row.booths}</td>
+                          <td className="px-2 py-2 whitespace-nowrap">{currency(row.plasticRevenue)}</td>
+                          <td className="px-2 py-2 whitespace-nowrap">{currency(row.sponsorRecurring)}</td>
+                          <td className="px-2 py-2 whitespace-nowrap">{currency(row.sponsorSupport)}</td>
+                          <td className="px-2 py-2 whitespace-nowrap">{currency(row.opex)}</td>
+                          <td className="px-2 py-2 whitespace-nowrap">{currency(row.capex)}</td>
+                          <td className={`px-2 py-2 font-medium whitespace-nowrap ${row.net >= 0 ? 'text-emerald-700' : 'text-rose-600'}`}>{currency(row.net)}</td>
+                        </tr>
+                      ))}
+                      <tr className="bg-emerald-50/70 font-semibold text-slate-900">
+                        <td className="px-3 py-3 whitespace-nowrap" colSpan={3}>Total over 24 months</td>
+                        <td className="px-2 py-2 whitespace-nowrap">{currency(385704)}</td>
+                        <td className="px-2 py-2 whitespace-nowrap">{currency(441000)}</td>
+                        <td className="px-2 py-2 whitespace-nowrap">{currency(160000)}</td>
+                        <td className="px-2 py-2 whitespace-nowrap">{currency(411000)}</td>
+                        <td className="px-2 py-2 whitespace-nowrap">{currency(540000)}</td>
+                        <td className="px-2 py-2 text-emerald-700 whitespace-nowrap">{currency(35704)}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              <div className="hidden md:block">
+                <div className="max-w-full overflow-x-auto overflow-y-hidden overscroll-x-contain rounded-2xl border border-emerald-100" style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-x pan-y' }}>
+                  <table className="min-w-[1020px] xl:min-w-full table-auto text-left text-sm">
+                    <thead>
+                      <tr className="border-b border-emerald-100 text-slate-500">
+                        <th className="px-2 py-2 font-medium whitespace-nowrap">Phase</th>
+                        <th className="px-2 py-2 font-medium whitespace-nowrap">Period</th>
+                        <th className="px-2 py-2 font-medium whitespace-nowrap">Booths</th>
+                        <th className="px-2 py-2 font-medium whitespace-nowrap">Plastic revenue</th>
+                        <th className="px-2 py-2 font-medium whitespace-nowrap">Sponsor recurring</th>
+                        <th className="px-2 py-2 font-medium whitespace-nowrap">Sponsor support</th>
+                        <th className="px-2 py-2 font-medium whitespace-nowrap">Opex</th>
+                        <th className="px-2 py-2 font-medium whitespace-nowrap">Capex</th>
+                        <th className="px-2 py-2 font-medium whitespace-nowrap">Net</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {phaseSummary.map((row) => (
+                        <tr key={row.phase} className="border-b border-slate-100">
+                          <td className="px-2 py-2 font-medium text-slate-900">{row.phase}</td>
+                          <td className="px-2 py-2">{row.period}</td>
+                          <td className="px-2 py-2">{row.booths}</td>
+                          <td className="px-2 py-2">{currency(row.plasticRevenue)}</td>
+                          <td className="px-2 py-2">{currency(row.sponsorRecurring)}</td>
+                          <td className="px-2 py-2">{currency(row.sponsorSupport)}</td>
+                          <td className="px-2 py-2">{currency(row.opex)}</td>
+                          <td className="px-2 py-2">{currency(row.capex)}</td>
+                          <td className={`px-2 py-2 font-medium ${row.net >= 0 ? 'text-emerald-700' : 'text-rose-600'}`}>{currency(row.net)}</td>
+                        </tr>
+                      ))}
+                      <tr className="bg-emerald-50/70 font-semibold text-slate-900">
+                        <td className="px-3 py-3" colSpan={3}>Total over 24 months</td>
+                        <td className="px-2 py-2">{currency(385704)}</td>
+                        <td className="px-2 py-2">{currency(441000)}</td>
+                        <td className="px-2 py-2">{currency(160000)}</td>
+                        <td className="px-2 py-2">{currency(411000)}</td>
+                        <td className="px-2 py-2">{currency(540000)}</td>
+                        <td className="px-2 py-2 text-emerald-700">{currency(35704)}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </CardContent>
           </Card>
